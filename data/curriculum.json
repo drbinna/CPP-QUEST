@@ -1,0 +1,1341 @@
+{
+ "chapters": [
+  {
+   "id": "c1",
+   "blurb": "Ch. 00 — what C++ changes.",
+   "title": "From C to C++"
+  },
+  {
+   "id": "c2",
+   "blurb": "Ch. 01 — streams, arithmetic, decisions.",
+   "title": "First programs"
+  },
+  {
+   "id": "c3",
+   "blurb": "Ch. 02 — selection, repetition, case studies.",
+   "title": "Control structures"
+  },
+  {
+   "id": "c4",
+   "blurb": "The mechanics P1 assumes: references, new/delete, classes.",
+   "title": "C++ for CSC 255"
+  },
+  {
+   "id": "c5",
+   "blurb": "P1 skills: shifting, guards, the expand pattern.",
+   "title": "The Array List"
+  },
+  {
+   "id": "c6",
+   "blurb": "P2 skills: wraparound and virtual-to-physical mapping.",
+   "title": "Going Circular"
+  },
+  {
+   "id": "c7",
+   "blurb": "P4 skills: recursion, node pointers, insert, traversal.",
+   "title": "The Binary Search Tree"
+  },
+  {
+   "id": "c8",
+   "blurb": "P4's real test driver: exact formats, duplicate rejects, remove, getValue, clear.",
+   "title": "The Harness"
+  },
+  {
+   "id": "c9",
+   "blurb": "Inheritance: protected, virtual, override, and calling the base's version before adding your own step. P4 preparing for P5.",
+   "title": "The Base Class"
+  },
+  {
+   "id": "c10",
+   "blurb": "P5: node heights, then the rotations that keep the tree balanced. Test 1 of the boss is the professor's own correct output.",
+   "title": "The AVL Tree"
+  }
+ ],
+ "lessons": [
+  {
+   "id": "l1",
+   "xp": 50,
+   "hints": [
+    "Output goes through `std::cout` with the `<<` operator, and the text goes in double quotes.",
+    "std::cout << \"Welcome to C++!\\n\";"
+   ],
+   "tests": [
+    {
+     "input": "",
+     "expected": "Welcome to C++!"
+    }
+   ],
+   "title": "Welcome to C++",
+   "chapter": "c1",
+   "concept": [
+    "C++ started at Bell Labs in 1979 as Bjarne Stroustrup's extension to C — nowadays a language of its own.",
+    "`std::cout` is the standard output stream. The `<<` operator inserts values into it, and `\\n` inside a string moves output to a new line."
+   ],
+   "example": "#include <iostream>\n\nint main() {\n    std::cout << \"some text\\n\";\n    return 0;\n}",
+   "starter": "// A first program in C++.\n#include <iostream>\n\nint main() {\n    // Print: Welcome to C++!\n    \n    return 0; // program ended successfully\n}\n",
+   "challenge": "Print exactly: **Welcome to C++!** — this is fig. 1.2 from your slides."
+  },
+  {
+   "id": "l2",
+   "xp": 60,
+   "hints": [
+    "Start the counter at 0 and keep looping while it is less than 5.",
+    "for (int i = 0; i < 5; i++) std::cout << i << \"\\n\";"
+   ],
+   "tests": [
+    {
+     "input": "",
+     "expected": "0\n1\n2\n3\n4"
+    }
+   ],
+   "title": "Declare anywhere",
+   "chapter": "c1",
+   "concept": [
+    "Unlike C, C++ lets you declare variables where you need them — not just at the top of a block.",
+    "That includes the `for` header: `for (int i = 0; i < 5; i++)`. The counter exists only during the loop, then goes away."
+   ],
+   "example": "for (int i = 0; i < 3; i++)\n    std::cout << i << \"\\n\";   // prints 0, 1, 2",
+   "starter": "#include <iostream>\n\nint main() {\n    // Declare the counter inside the for header\n    \n    return 0;\n}\n",
+   "challenge": "Using a counter declared in the loop header, print the numbers 0 through 4, one per line."
+  },
+  {
+   "id": "l3",
+   "xp": 75,
+   "hints": [
+    "Store the comparison in the bool: `result = a < b;`",
+    "std::cout << std::boolalpha << result << \"\\n\"; — or use if/else to print the words."
+   ],
+   "tests": [
+    {
+     "input": "3 5",
+     "expected": "true"
+    },
+    {
+     "input": "9 2",
+     "expected": "false"
+    },
+    {
+     "input": "4 4",
+     "expected": "false"
+    }
+   ],
+   "title": "The bool type",
+   "chapter": "c1",
+   "concept": [
+    "C had no true/false type; C++ adds `bool` with literals `true` and `false`.",
+    "Relational operators like `<` produce bool values. `std::boolalpha` makes cout print them as words instead of 1/0."
+   ],
+   "example": "bool ok = (3 < 5);                     // true\nstd::cout << std::boolalpha << ok;     // prints: true",
+   "starter": "#include <iostream>\n\nint main() {\n    int a, b;\n    std::cin >> a >> b;\n    bool result = false; // make this a < b\n    // print it as a word\n    \n    return 0;\n}\n",
+   "challenge": "Read two integers `a` and `b`. Print **true** if `a < b`, otherwise **false**."
+  },
+  {
+   "id": "l4",
+   "xp": 75,
+   "hints": [
+    "Read into the fields directly: `std::cin >> p.x >> p.y;`",
+    "std::cout << \"(\" << p.x << \", \" << p.y << \")\\n\";"
+   ],
+   "tests": [
+    {
+     "input": "3 4",
+     "expected": "(3, 4)"
+    },
+    {
+     "input": "-1 7",
+     "expected": "(-1, 7)"
+    }
+   ],
+   "title": "Tagged structs",
+   "chapter": "c1",
+   "concept": [
+    "In C++ a struct tag is a type name by itself — you write `MyType v;`, no `struct` keyword needed at the declaration.",
+    "This is the first step toward classes: data grouped under one name, fields accessed with `.`"
+   ],
+   "example": "struct MyType { int A; float B; };\nMyType V;        // C would require: struct MyType V;\nV.A = 3;",
+   "starter": "#include <iostream>\n\nstruct Point {\n    int x;\n    int y;\n};\n\nint main() {\n    Point p; // no 'struct' keyword needed in C++\n    // read p.x and p.y, then print (x, y)\n    \n    return 0;\n}\n",
+   "challenge": "A `Point` struct is defined for you. Read `x` and `y`, store them in a Point, and print it as **(x, y)** — parenthesis, comma, space."
+  },
+  {
+   "id": "l5",
+   "xp": 60,
+   "hints": [
+    "You need three `\\n` total — and two of them are next to each other.",
+    "std::cout << \"Welcome\\nto\\n\\nC++!\\n\";"
+   ],
+   "tests": [
+    {
+     "input": "",
+     "expected": "Welcome\nto\n\nC++!"
+    }
+   ],
+   "title": "Escape sequences",
+   "chapter": "c2",
+   "concept": [
+    "One statement can print several lines: `\\n` is a newline wherever it appears in the string.",
+    "Two `\\n` in a row produce a blank line."
+   ],
+   "example": "std::cout << \"one\\ntwo\\n\";\n// one\n// two",
+   "starter": "// Printing multiple lines with a single statement\n#include <iostream>\n\nint main() {\n    // one std::cout statement\n    \n    return 0;\n}\n",
+   "challenge": "Reproduce fig. 1.5 exactly — print **Welcome**, **to**, a blank line, then **C++!** using a single output statement."
+  },
+  {
+   "id": "l6",
+   "xp": 75,
+   "hints": [
+    "Chain the reads: `std::cin >> integer1 >> integer2;`",
+    "sum = integer1 + integer2; std::cout << \"Sum is \" << sum << std::endl;"
+   ],
+   "tests": [
+    {
+     "input": "45 72",
+     "expected": "Sum is 117"
+    },
+    {
+     "input": "10 -4",
+     "expected": "Sum is 6"
+    }
+   ],
+   "title": "Adding two integers",
+   "chapter": "c2",
+   "concept": [
+    "`std::cin >> x` waits for input and stores it in `x`, converting to the variable's type. `=` assigns a value.",
+    "Insertions can be chained: `cout << \"Sum is \" << sum << endl;` — this is fig. 1.6 from your slides. (We skip the prompts; the grader only checks output.)"
+   ],
+   "example": "int x;\nstd::cin >> x;          // reads one integer\nstd::cout << x + 1;     // calculations can appear in output",
+   "starter": "// Addition program.\n#include <iostream>\n\nint main() {\n    int integer1; // first number\n    int integer2; // second number\n    int sum;      // variable in which sum will be stored\n    \n    // read both, assign the sum, print: Sum is <sum>\n    \n    return 0;\n}\n",
+   "challenge": "Read two integers and print **Sum is** followed by their total."
+  },
+  {
+   "id": "l7",
+   "xp": 75,
+   "hints": [
+    "Two separate output lines — remember the `\\n` between them.",
+    "std::cout << a / b << \"\\n\" << a % b << \"\\n\";"
+   ],
+   "tests": [
+    {
+     "input": "7 5",
+     "expected": "1\n2"
+    },
+    {
+     "input": "20 4",
+     "expected": "5\n0"
+    },
+    {
+     "input": "3 7",
+     "expected": "0\n3"
+    }
+   ],
+   "title": "Integer arithmetic",
+   "chapter": "c2",
+   "concept": [
+    "Integer division truncates: `7 / 5` is `1`. The modulus operator `%` gives the remainder: `7 % 5` is `2`.",
+    "Precedence: parentheses first, then `* / %`, then `+ -`, applied left to right."
+   ],
+   "example": "7 / 5    // 1  (remainder thrown away)\n7 % 5    // 2  (just the remainder)",
+   "starter": "#include <iostream>\n\nint main() {\n    int a, b;\n    std::cin >> a >> b;\n    // quotient, then remainder\n    \n    return 0;\n}\n",
+   "challenge": "Read two integers `a` and `b`. Print `a / b` on the first line and `a % b` on the second."
+  },
+  {
+   "id": "l8",
+   "xp": 100,
+   "hints": [
+    "Six separate if statements, one per operator — each phrased exactly like the first.",
+    "The middle text for each: \" is not equal to \", \" is less than \", \" is greater than \", \" is less than or equal to \", \" is greater than or equal to \"."
+   ],
+   "tests": [
+    {
+     "input": "22 12",
+     "expected": "22 is not equal to 12\n22 is greater than 12\n22 is greater than or equal to 12"
+    },
+    {
+     "input": "7 7",
+     "expected": "7 is equal to 7\n7 is less than or equal to 7\n7 is greater than or equal to 7"
+    },
+    {
+     "input": "3 9",
+     "expected": "3 is not equal to 9\n3 is less than 9\n3 is less than or equal to 9"
+    }
+   ],
+   "title": "Relational operators",
+   "chapter": "c2",
+   "concept": [
+    "`using std::cout;` lets you drop the `std::` prefix for that name.",
+    "Equality (`==`, `!=`) and relational (`<`, `>`, `<=`, `>=`) operators each produce a bool an `if` can test. Several relationships can hold at once."
+   ],
+   "example": "if (num1 == num2)\n    cout << num1 << \" is equal to \" << num2 << endl;",
+   "starter": "// Using if statements, relational and equality operators.\n#include <iostream>\n\nusing std::cout;\nusing std::cin;\nusing std::endl;\n\nint main() {\n    int num1, num2;\n    cin >> num1 >> num2;\n    \n    if (num1 == num2)\n        cout << num1 << \" is equal to \" << num2 << endl;\n    // now: != (not equal to), < (less than), > (greater than),\n    // <= (less than or equal to), >= (greater than or equal to)\n    \n    return 0;\n}\n",
+   "challenge": "Fig. 1.14: read two integers and print one line for **every** relationship that holds, in this order: equal, not equal, less than, greater than, less than or equal, greater than or equal. Match the slide's wording: e.g. **22 is greater than 12**."
+  },
+  {
+   "id": "l9",
+   "xp": 75,
+   "hints": [
+    "\"At least 60\" means `>= 60` — 60 itself passes.",
+    "cout << (grade >= 60 ? \"Passed\" : \"Failed\") << \"\\n\";"
+   ],
+   "tests": [
+    {
+     "input": "75",
+     "expected": "Passed"
+    },
+    {
+     "input": "59",
+     "expected": "Failed"
+    },
+    {
+     "input": "60",
+     "expected": "Passed"
+    }
+   ],
+   "title": "if / else",
+   "chapter": "c3",
+   "concept": [
+    "The selection structure chooses between paths. From the slides: *if grade is greater than or equal to 60, print Passed, else print Failed.*",
+    "Only sequence, selection, and repetition are needed to express any algorithm (Bohm & Jacopini) — no gotos, mmm 'kay?"
+   ],
+   "example": "if (grade >= 60)\n    cout << \"Passed\";\nelse\n    cout << \"Failed\";\n\n// or in one line with the ternary operator:\ncout << (grade >= 60 ? \"Passed\" : \"Failed\");",
+   "starter": "#include <iostream>\n\nusing std::cout;\nusing std::cin;\n\nint main() {\n    int grade;\n    cin >> grade;\n    // Passed or Failed?\n    \n    return 0;\n}\n",
+   "challenge": "Read a grade. Print **Passed** if it is at least 60, otherwise **Failed**."
+  },
+  {
+   "id": "l10",
+   "xp": 100,
+   "hints": [
+    "Because earlier tests already ruled out higher grades, each `else if` only needs its lower bound.",
+    "Finish the ladder with a plain `else` (no condition) for F."
+   ],
+   "tests": [
+    {
+     "input": "95",
+     "expected": "A"
+    },
+    {
+     "input": "83",
+     "expected": "B"
+    },
+    {
+     "input": "71",
+     "expected": "C"
+    },
+    {
+     "input": "65",
+     "expected": "D"
+    },
+    {
+     "input": "30",
+     "expected": "F"
+    }
+   ],
+   "title": "Nested if / else",
+   "chapter": "c3",
+   "concept": [
+    "Chained `else if` tests multiple cases; once one condition is met, the rest are skipped — so test from highest to lowest."
+   ],
+   "example": "if (grade >= 90)       // 90 and above\n    cout << \"A\";\nelse if (grade >= 80)  // 80-89\n    cout << \"B\";\n// ... and so on",
+   "starter": "#include <iostream>\n\nusing std::cout;\nusing std::cin;\n\nint main() {\n    int grade;\n    cin >> grade;\n    \n    if (grade >= 90)       // 90 and above\n        cout << \"A\";\n    // 80-89: B, 70-79: C, 60-69: D, below 60: F\n    \n    return 0;\n}\n",
+   "challenge": "Read a grade and print the letter, exactly as in section 2.6: 90+ is **A**, 80-89 **B**, 70-79 **C**, 60-69 **D**, below 60 **F**."
+  },
+  {
+   "id": "l11",
+   "xp": 125,
+   "hints": [
+    "Inside the loop: declare a grade, read it with cin, and add it to total.",
+    "After the loop: cout << \"Class average is \" << total / 10 << endl;"
+   ],
+   "tests": [
+    {
+     "input": "98 76 71 87 83 90 57 79 82 94",
+     "expected": "Class average is 81"
+    },
+    {
+     "input": "100 100 100 100 100 100 100 100 100 100",
+     "expected": "Class average is 100"
+    }
+   ],
+   "title": "Counter-controlled repetition",
+   "chapter": "c3",
+   "concept": [
+    "Case study 1 (fig. 2.7): a `while` loop repeats while its condition is true.",
+    "Counter-controlled repetition runs an exact number of times: initialize a total and a counter, loop, add each grade, increment the counter."
+   ],
+   "example": "int total = 0;\nint gradeCounter = 1;\nwhile (gradeCounter <= 10) {\n    // ... read and accumulate ...\n    gradeCounter = gradeCounter + 1;\n}",
+   "starter": "// Class average program with counter-controlled repetition.\n#include <iostream>\n\nusing std::cout;\nusing std::cin;\nusing std::endl;\n\nint main() {\n    int total = 0;       // sum of grades\n    int gradeCounter = 1; // number of the grade to be entered next\n    \n    while (gradeCounter <= 10) {\n        // read a grade, add to total, increment counter\n        gradeCounter = gradeCounter + 1;\n    }\n    \n    // average = total / 10 (integer division)\n    \n    return 0;\n}\n",
+   "challenge": "Read exactly **10** grades. Print **Class average is** followed by the integer average (integer division, just like the book)."
+  },
+  {
+   "id": "l12",
+   "xp": 150,
+   "hints": [
+    "Integer / integer truncates — cast one side: `static_cast<double>(total) / gradeCounter`.",
+    "cout << \"Class average is \" << std::fixed << std::setprecision(2) << average << endl;"
+   ],
+   "tests": [
+    {
+     "input": "75 94 97 88 70 64 83 89 -1",
+     "expected": "Class average is 82.50"
+    },
+    {
+     "input": "-1",
+     "expected": "No grades were entered"
+    },
+    {
+     "input": "90 80 -1",
+     "expected": "Class average is 85.00"
+    }
+   ],
+   "title": "Sentinel-controlled repetition",
+   "chapter": "c3",
+   "concept": [
+    "Case study 2 (fig. 2.9): when you don't know how many values are coming, loop until a **sentinel** value (here `-1`) signals the end.",
+    "The average of an unknown count needs a `double`, printed with `std::fixed` and `std::setprecision(2)` from `<iomanip>`."
+   ],
+   "example": "cin >> grade;              // first read, before the loop\nwhile (grade != -1) {\n    // ... use grade ...\n    cin >> grade;          // next read, at the bottom\n}",
+   "starter": "// Class average program with sentinel-controlled repetition.\n#include <iostream>\n#include <iomanip>\n\nusing std::cout;\nusing std::cin;\nusing std::endl;\n\nint main() {\n    int total = 0;\n    int gradeCounter = 0;\n    int grade;\n    \n    cin >> grade;\n    while (grade != -1) {\n        // accumulate, count, read the next grade\n    }\n    \n    // if gradeCounter != 0: average = double(total) / gradeCounter, 2 decimals\n    // else: No grades were entered\n    \n    return 0;\n}\n",
+   "challenge": "Read grades until `-1`. Print **Class average is** with two decimals. If the first value is the sentinel, print **No grades were entered** instead."
+  },
+  {
+   "id": "l13",
+   "xp": 250,
+   "boss": true,
+   "hints": [
+    "if (result == 1) passes = passes + 1; else failures = failures + 1;",
+    "After the two count lines: if (passes > 8) cout << \"Raise tuition\" << endl;"
+   ],
+   "tests": [
+    {
+     "input": "1 2 2 1 1 1 2 1 1 1",
+     "expected": "Passed 7\nFailed 3"
+    },
+    {
+     "input": "1 1 1 1 1 1 1 1 2 1",
+     "expected": "Passed 9\nFailed 1\nRaise tuition"
+    },
+    {
+     "input": "2 2 2 2 2 2 2 2 2 2",
+     "expected": "Passed 0\nFailed 10"
+    }
+   ],
+   "title": "Boss: exam results",
+   "chapter": "c3",
+   "concept": [
+    "Case study 3 (fig. 2.11), nested control structures: an `if/else` **inside** a `while` loop.",
+    "Process 10 exam results: `1` means pass, `2` means fail. Count each kind as you go."
+   ],
+   "example": "while (studentCounter <= 10) {\n    cin >> result;\n    if (result == 1)   // nested inside the loop\n        // count a pass\n    else\n        // count a failure\n}",
+   "starter": "// Analysis of examination results.\n#include <iostream>\n\nusing std::cout;\nusing std::cin;\nusing std::endl;\n\nint main() {\n    int passes = 0;\n    int failures = 0;\n    int studentCounter = 1;\n    \n    while (studentCounter <= 10) {\n        int result;\n        cin >> result;\n        // nested if/else: 1 is a pass, 2 is a failure\n        studentCounter = studentCounter + 1;\n    }\n    \n    cout << \"Passed \" << passes << endl;\n    cout << \"Failed \" << failures << endl;\n    // more than 8 passes: Raise tuition\n    \n    return 0;\n}\n",
+   "challenge": "After the loop print **Passed** and the count, then **Failed** and the count, each on its own line. If more than 8 students passed, print **Raise tuition** as a third line."
+  },
+  {
+   "id": "l14",
+   "xp": 100,
+   "hints": [
+    "The `&` in `int &result` means result IS the caller's variable. Assigning to it changes theirs.",
+    "bool halve(int n, int &result) { if (n % 2 == 0) { result = n / 2; return true; } return false; }"
+   ],
+   "tests": [
+    {
+     "input": "8",
+     "expected": "yes 4"
+    },
+    {
+     "input": "7",
+     "expected": "no -1"
+    },
+    {
+     "input": "0",
+     "expected": "yes 0"
+    }
+   ],
+   "title": "Reference parameters",
+   "chapter": "c4",
+   "concept": [
+    "Course functions return bool for success and hand results back through reference parameters, like `bool deleteFirst(KEY_VALUE &kv)`."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\n// bool halve(int n, int &result)\n// even n: set result to n / 2, return true\n// odd n: leave result alone, return false\n// Write the function here:\n\n\nint main() {\n    int n, result = -1;\n    cin >> n;\n    if (halve(n, result))\n        cout << \"yes \" << result << \"\\n\";\n    else\n        cout << \"no \" << result << \"\\n\";\n    return 0;\n}\n",
+   "challenge": "Write `bool halve(int n, int &result)`. If `n` is even, set `result` to `n / 2` and return **true**. If `n` is odd, leave `result` alone and return **false**."
+  },
+  {
+   "id": "l15",
+   "xp": 100,
+   "hints": [
+    "`int *a = new int[n];` allocates. Loop to fill, loop (or the same loop) to sum.",
+    "After printing: `delete[] a;` with the brackets, because it was allocated with `new[]`."
+   ],
+   "tests": [
+    {
+     "input": "4",
+     "expected": "14"
+    },
+    {
+     "input": "1",
+     "expected": "0"
+    },
+    {
+     "input": "5",
+     "expected": "30"
+    }
+   ],
+   "title": "new and delete[]",
+   "chapter": "c4",
+   "concept": [
+    "P1's list stores its data in `KEY_VALUE *keyValues = new KEY_VALUE[capacity]` and frees it with `delete[]` in the destructor."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    // allocate with new, fill a[i] = i * i, sum, print, delete[]\n    \n    return 0;\n}\n",
+   "challenge": "Read `n`. Allocate an int array of size `n` with `new`, fill it so index `i` holds `i * i`, print the **sum** of the array, then free it with `delete[]`."
+  },
+  {
+   "id": "l16",
+   "xp": 100,
+   "hints": [
+    "Guard the loop with both conditions: `while (count < CAP && cin >> v && v != -1)`.",
+    "Store with `a[count] = v; count++;` then print count, capacity, and loop the values with spaces."
+   ],
+   "tests": [
+    {
+     "input": "3 9 4 -1",
+     "expected": "count=3 capacity=8\n3 9 4"
+    },
+    {
+     "input": "1 2 3 4 5 6 7 8 9",
+     "expected": "count=8 capacity=8\n1 2 3 4 5 6 7 8"
+    },
+    {
+     "input": "-1",
+     "expected": "count=0 capacity=8"
+    }
+   ],
+   "title": "Count vs capacity",
+   "chapter": "c4",
+   "concept": [
+    "Every ADT this semester tracks two numbers: `listCapacity` (room) and `listCount` (used). Confusing them is the classic P1 bug."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nint main() {\n    const int CAP = 8;\n    int a[CAP];\n    int count = 0;\n    // read until -1 or full, then report\n    \n    return 0;\n}\n",
+   "challenge": "An array has capacity 8. Read integers until **-1** or until the array is **full**. Then print `count=C capacity=8` on one line and the stored values on the next."
+  },
+  {
+   "id": "l17",
+   "xp": 100,
+   "hints": [
+    "Constructor: `Counter::Counter() { n = 0; }` and bump is one line: `n = n + 1;`",
+    "The const goes in the definition too: `int Counter::get() const { return n; }`"
+   ],
+   "tests": [
+    {
+     "input": "3",
+     "expected": "3"
+    },
+    {
+     "input": "0",
+     "expected": "0"
+    },
+    {
+     "input": "7",
+     "expected": "7"
+    }
+   ],
+   "title": "Your first class",
+   "chapter": "c4",
+   "concept": [
+    "A **class** bundles private data with the public functions allowed to touch it. Member functions are defined as `ClassName::functionName`."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nclass Counter {\n    private:\n        int n;\n    public:\n        Counter();       // start n at 0\n        void bump();     // add 1 to n\n        int get() const; // return n; const means it does not change the object\n};\n\n// Define the three member functions here, like:\n// Counter::Counter() { ... }\n\n\nint main() {\n    Counter c;\n    int k;\n    cin >> k;\n    for (int i = 0; i < k; i++)\n        c.bump();\n    cout << c.get() << \"\\n\";\n    return 0;\n}\n",
+   "challenge": "Finish the `Counter` class: `Counter()` starts `n` at 0, `bump()` adds 1, and `get() const` returns `n`. The provided `main` bumps `k` times and prints the count."
+  },
+  {
+   "id": "l18",
+   "xp": 100,
+   "hints": [
+    "Write the default only in the declaration; the definition is plain `Tank::Tank(int f) { fuel = f; }`.",
+    "Clamp inside use: `fuel = fuel - amt; if (fuel < 0) fuel = 0;`"
+   ],
+   "tests": [
+    {
+     "input": "100 30",
+     "expected": "70\n50"
+    },
+    {
+     "input": "20 50",
+     "expected": "0\n50"
+    },
+    {
+     "input": "60 60",
+     "expected": "0\n50"
+    }
+   ],
+   "title": "Constructors with defaults",
+   "chapter": "c4",
+   "concept": [
+    "P1's constructor is `list(unsigned int size = 100, unsigned int expandSize = 5)`. Callers who pass nothing get the defaults."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nclass Tank {\n    private:\n        int fuel;\n    public:\n        Tank(int f = 50);   // default argument lives in the declaration\n        void use(int amt);  // never let fuel go below 0\n        int getFuel() const;\n};\n\n// Define the member functions here\n\n\nint main() {\n    int start, amt;\n    cin >> start >> amt;\n    Tank t(start);\n    t.use(amt);\n    cout << t.getFuel() << \"\\n\";\n    Tank d;             // uses the default\n    cout << d.getFuel() << \"\\n\";\n    return 0;\n}\n",
+   "challenge": "Finish the `Tank` class: `Tank(int f = 50)` stores starting fuel, `use(int amt)` burns fuel but never below 0, `getFuel() const` returns it. Main prints your tank after one `use`, then a **default** tank."
+  },
+  {
+   "id": "l19",
+   "xp": 125,
+   "hints": [
+    "Loop `for (int i = count; i > 0; i--) a[i] = a[i - 1];` walks backward so nothing is lost.",
+    "After the shift: `a[0] = v; count++;` then print with spaces."
+   ],
+   "tests": [
+    {
+     "input": "3 5 6 7 9",
+     "expected": "9 5 6 7"
+    },
+    {
+     "input": "1 4 8",
+     "expected": "8 4"
+    },
+    {
+     "input": "0 3",
+     "expected": "3"
+    }
+   ],
+   "title": "Insert means shift right",
+   "chapter": "c5",
+   "concept": [
+    "P1's `insert(kv)` puts the new value at index 0 after shifting every entry one slot right. Shift from the **end** toward the front or you overwrite data."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int a[10];\n    int count, v;\n    cin >> count;\n    for (int i = 0; i < count; i++)\n        cin >> a[i];\n    cin >> v;\n    // shift everything right, put v at index 0, count goes up\n    \n    return 0;\n}\n",
+   "challenge": "Read `n`, then `n` values into an array, then one value `v`. Insert `v` at the **front** by shifting, and print the whole list space separated."
+  },
+  {
+   "id": "l20",
+   "xp": 125,
+   "hints": [
+    "Shift left goes forward: `for (int i = 0; i < count - 1; i++) a[i] = a[i + 1];`",
+    "Save `a[0]` into a variable BEFORE the shift, or the value is gone."
+   ],
+   "tests": [
+    {
+     "input": "3 5 6 7",
+     "expected": "deleted 5\n6 7"
+    },
+    {
+     "input": "1 9",
+     "expected": "deleted 9"
+    },
+    {
+     "input": "0",
+     "expected": "empty"
+    }
+   ],
+   "title": "Delete means shift left",
+   "chapter": "c5",
+   "concept": [
+    "P1's `deleteFirst(kv)` saves the first entry into the reference parameter, shifts everything left, and returns false on an empty list without touching `kv`."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int a[10];\n    int count;\n    cin >> count;\n    for (int i = 0; i < count; i++)\n        cin >> a[i];\n    // empty guard, save first, shift left, count down\n    \n    return 0;\n}\n",
+   "challenge": "Read `n`, then `n` values. If the list is empty print **empty**. Otherwise delete the first entry: print `deleted X`, then the remaining values on the next line."
+  },
+  {
+   "id": "l21",
+   "xp": 125,
+   "hints": [
+    "The guard is `if (i > count)`, not `>=`. Index equal to count means append at the end.",
+    "Shift only the tail: `for (int k = count; k > i; k--) a[k] = a[k - 1];` then `a[i] = v;`"
+   ],
+   "tests": [
+    {
+     "input": "3 5 6 7 1 9",
+     "expected": "true\n5 9 6 7"
+    },
+    {
+     "input": "2 4 8 2 6",
+     "expected": "true\n4 8 6"
+    },
+    {
+     "input": "2 4 8 5 6",
+     "expected": "false\n4 8"
+    }
+   ],
+   "title": "insertAt and its guard",
+   "chapter": "c5",
+   "concept": [
+    "P1's `insertAt(index, kv)` allows index 0 through `listCount` inclusive: inserting AT the count is a legal append. Anything bigger returns false with no change."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int a[10];\n    int count, i, v;\n    cin >> count;\n    for (int k = 0; k < count; k++)\n        cin >> a[k];\n    cin >> i >> v;\n    // guard, shift, place, report\n    \n    return 0;\n}\n",
+   "challenge": "Read `n`, `n` values, then `i` and `v`. If `i > n` print **false** and the unchanged list. Otherwise insert `v` at index `i` (shift right from the back), print **true** and the new list."
+  },
+  {
+   "id": "l22",
+   "xp": 125,
+   "hints": [
+    "Expansion: `int *b = new int[cap + 2];` copy loop, `delete[] a;`, `a = b;`, `cap += 2;`",
+    "Delete the OLD array before repointing, or you leak it. Never delete and then copy."
+   ],
+   "tests": [
+    {
+     "input": "1 2 -1",
+     "expected": "capacity=3 count=2\n1 2"
+    },
+    {
+     "input": "1 2 3 4 -1",
+     "expected": "capacity=5 count=4\n1 2 3 4"
+    },
+    {
+     "input": "1 2 3 4 5 6 -1",
+     "expected": "capacity=7 count=6\n1 2 3 4 5 6"
+    }
+   ],
+   "title": "The expand pattern",
+   "chapter": "c5",
+   "concept": [
+    "When P1's list is full, `expand()` allocates a bigger array, copies the old values over, deletes the old array, and repoints. The pointer swap order matters."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int cap = 3;\n    int cnt = 0;\n    int *a = new int[cap];\n    int v;\n    while (cin >> v && v != -1) {\n        // if full: new bigger array, copy, delete[] old, repoint, cap += 2\n        // then store v\n    }\n    // print the report, then delete[] a\n    \n    return 0;\n}\n",
+   "challenge": "Start with a `new` array of capacity 3. Read values until **-1**; when full, expand capacity by **2** using the allocate-copy-delete-repoint pattern. Finish by printing `capacity=C count=N` and the values."
+  },
+  {
+   "id": "l23",
+   "xp": 200,
+   "boss": true,
+   "hints": [
+    "Both add and insert start with the same guard: `if (cnt == cap) return false;`",
+    "printIt is `for (int i = 0; i < cnt; i++) cout << i << \": \" << a[i] << \"\\n\";` and deleteFirst mirrors your l20 code."
+   ],
+   "tests": [
+    {
+     "input": "4 2 3 4 5 6 -1",
+     "expected": "add 2 true\ninsert 3 true\nadd 4 true\ninsert 5 true\nadd 6 false\ncount 4\n0: 5\n1: 3\n2: 2\n3: 4\ndeleted 5\n0: 3\n1: 2\n2: 4"
+    },
+    {
+     "input": "1 7 8 -1",
+     "expected": "insert 7 true\nadd 8 false\ncount 1\n0: 7\ndeleted 7"
+    },
+    {
+     "input": "2 -1",
+     "expected": "count 0\nempty"
+    }
+   ],
+   "title": "Boss: miniList",
+   "chapter": "c5",
+   "concept": [
+    "Everything P1 part A needs in one class: dynamic array, count vs capacity, front insert with shifting, append, guarded delete."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nclass miniList {\n    private:\n        int *a;\n        int cap;\n        int cnt;\n    public:\n        miniList(int c);            // allocate, cnt = 0\n        ~miniList();                // delete[] the array\n        bool add(int v);            // append at the end\n        bool insert(int v);         // shift right, place at index 0\n        bool deleteFirst(int &v);   // guard empty, save, shift left\n        int getCount() const;\n        void printIt() const;       // lines like  0: 5\n};\n\n// Define the members here\n\n\nint main() {\n    int c, x;\n    cin >> c;\n    miniList L(c);\n    while (cin >> x && x != -1) {\n        if (x % 2 == 0)\n            cout << \"add \" << x << \" \" << (L.add(x) ? \"true\" : \"false\") << \"\\n\";\n        else\n            cout << \"insert \" << x << \" \" << (L.insert(x) ? \"true\" : \"false\") << \"\\n\";\n    }\n    cout << \"count \" << L.getCount() << \"\\n\";\n    L.printIt();\n    int d;\n    if (L.deleteFirst(d))\n        cout << \"deleted \" << d << \"\\n\";\n    else\n        cout << \"empty\\n\";\n    L.printIt();\n    return 0;\n}\n",
+   "challenge": "Finish `miniList`. `add` appends (false when full), `insert` shifts right and places at the front (false when full), `deleteFirst` uses the reference-parameter idiom, `printIt` prints one `index: value` line per entry. The provided main drives it: even inputs are added, odd inputs are inserted."
+  },
+  {
+   "id": "l24",
+   "xp": 125,
+   "hints": [
+    "Adding `cap - 1` and taking `% cap` is the same as subtracting 1, but it can never produce a negative number.",
+    "return (x + 1) % cap;   and   return (x + cap - 1) % cap;"
+   ],
+   "tests": [
+    {
+     "input": "8 7",
+     "expected": "0\n6"
+    },
+    {
+     "input": "5 0",
+     "expected": "1\n4"
+    },
+    {
+     "input": "3 1",
+     "expected": "2\n0"
+    }
+   ],
+   "title": "Wraparound with %",
+   "chapter": "c6",
+   "concept": [
+    "P2's macros are the whole trick: `cListInc` is `(x + 1) % listCapacity` and `cListDec` is `(x + listCapacity - 1) % listCapacity`, which steps backward without ever going negative."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\n// int inc(int x, int cap)  ->  one step forward, wrapping to 0\n// int dec(int x, int cap)  ->  one step backward, wrapping to cap - 1\n\n\nint main() {\n    int cap, x;\n    cin >> cap >> x;\n    cout << inc(x, cap) << \"\\n\";\n    cout << dec(x, cap) << \"\\n\";\n    return 0;\n}\n",
+   "challenge": "Write `int inc(int x, int cap)` and `int dec(int x, int cap)` using those exact formulas. Main reads `cap` and `x`, then prints `inc(x, cap)` and `dec(x, cap)` on separate lines."
+  },
+  {
+   "id": "l25",
+   "xp": 125,
+   "hints": [
+    "Each insert is one `first = (first + cap - 1) % cap;` followed by printing first.",
+    "The value lands AT the new first, so print after stepping, and the final line reuses the same variable."
+   ],
+   "tests": [
+    {
+     "input": "8 2 3",
+     "expected": "1\n0\n7\nfirst=7"
+    },
+    {
+     "input": "5 0 2",
+     "expected": "4\n3\nfirst=3"
+    },
+    {
+     "input": "4 1 6",
+     "expected": "0\n3\n2\n1\n0\n3\nfirst=3"
+    }
+   ],
+   "title": "first walks backward",
+   "chapter": "c6",
+   "concept": [
+    "In P2, `insert()` is O(1): decrement `first` with wraparound and drop the value there. No shifting, ever."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int cap, first, n;\n    cin >> cap >> first >> n;\n    // n times: step first backward with wraparound, print it\n    // then print first=F\n    \n    return 0;\n}\n",
+   "challenge": "Read `cap`, `first`, and `n`. Simulate `n` inserts: each one moves `first` one step backward with wraparound and prints where the value landed. Finish with `first=F`."
+  },
+  {
+   "id": "l26",
+   "xp": 150,
+   "hints": [
+    "Validity is about count, not capacity: a virtual index is good when `vi < count`.",
+    "The map is one expression: `(first + vi) % cap`."
+   ],
+   "tests": [
+    {
+     "input": "8 6 5 3 0 2 4",
+     "expected": "6\n0\n2"
+    },
+    {
+     "input": "8 6 3 2 2 5",
+     "expected": "0\nbad"
+    },
+    {
+     "input": "5 4 5 3 0 4 2",
+     "expected": "4\n3\n1"
+    }
+   ],
+   "title": "virtualToPhysical",
+   "chapter": "c6",
+   "concept": [
+    "The user of cList thinks in **virtual** indexes: 0 is the first item. Physically, virtual index `vi` lives at `(first + vi) % listCapacity`. This mapping is the heart of P2."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int cap, first, count, q;\n    cin >> cap >> first >> count >> q;\n    // q times: read vi, validate against count, map with %\n    \n    return 0;\n}\n",
+   "challenge": "Read `cap`, `first`, `count`, and `q`. Then for each of `q` virtual indexes: print its physical index, or **bad** when the virtual index is not less than `count`."
+  },
+  {
+   "id": "l27",
+   "xp": 200,
+   "boss": true,
+   "hints": [
+    "add places without moving first: `a[(first + cnt) % cap] = v; cnt++;` insert is dec-then-place.",
+    "printIt loops virtual indexes 0 to cnt-1 and prints `a[(first + vi) % cap]` for each. readAt is the same map behind a `vi < cnt` guard."
+   ],
+   "tests": [
+    {
+     "input": "4 10 1 20 3 -1 2",
+     "expected": "add 10 true\ninsert 1 true\nadd 20 true\ninsert 3 true\n0: 3\n1: 1\n2: 10\n3: 20\nreadAt 2 -> 10"
+    },
+    {
+     "input": "2 5 6 7 -1 0",
+     "expected": "insert 5 true\nadd 6 true\ninsert 7 false\n0: 5\n1: 6\nreadAt 0 -> 5"
+    },
+    {
+     "input": "3 2 4 -1 5",
+     "expected": "add 2 true\nadd 4 true\n0: 2\n1: 4\nbad"
+    }
+   ],
+   "title": "Boss: the ring",
+   "chapter": "c6",
+   "concept": [
+    "P2 part A in miniature: `add` places at `(first + count) % cap`, `insert` walks `first` backward, and every read goes through the virtual-to-physical map. Nothing ever shifts."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nclass ring {\n    private:\n        int *a;\n        int cap;\n        int first;\n        int cnt;\n    public:\n        ring(int c);               // allocate, first = 0, cnt = 0\n        ~ring();\n        bool add(int v);           // place at (first + cnt) % cap\n        bool insert(int v);        // step first backward, place at first\n        bool readAt(int vi, int &v);  // validate, then map\n        void printIt() const;      // virtual order: vi: value\n};\n\n// Define the members here\n\n\nint main() {\n    int c, x;\n    cin >> c;\n    ring R(c);\n    while (cin >> x && x != -1) {\n        if (x % 2 == 0)\n            cout << \"add \" << x << \" \" << (R.add(x) ? \"true\" : \"false\") << \"\\n\";\n        else\n            cout << \"insert \" << x << \" \" << (R.insert(x) ? \"true\" : \"false\") << \"\\n\";\n    }\n    R.printIt();\n    int vi, v;\n    cin >> vi;\n    if (R.readAt(vi, v))\n        cout << \"readAt \" << vi << \" -> \" << v << \"\\n\";\n    else\n        cout << \"bad\\n\";\n    return 0;\n}\n",
+   "challenge": "Finish the `ring` class. `add(v)` appends at the physical end slot, `insert(v)` steps `first` backward and places there, `readAt(vi, v)` validates then maps, `printIt` prints `vi: value` in **virtual** order. The main drives it like the miniList boss, then does one `readAt`."
+  },
+  {
+   "id": "l28",
+   "xp": 100,
+   "hints": [
+    "Two lines of logic: `if (n == 0) return 0;` then the recursive case.",
+    "return n + sumTo(n - 1); trusts the smaller call to be right. That trust is the whole trick."
+   ],
+   "tests": [
+    {
+     "input": "4",
+     "expected": "10"
+    },
+    {
+     "input": "0",
+     "expected": "0"
+    },
+    {
+     "input": "10",
+     "expected": "55"
+    }
+   ],
+   "title": "Recursion warm-up",
+   "chapter": "c7",
+   "concept": [
+    "A recursive function calls itself on a smaller problem until it hits a base case. Every P4 tree function works this way."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\n// int sumTo(int n)\n// base case: n == 0 returns 0\n// otherwise: n + sumTo(n - 1)\n// Write it here (no loops allowed, just recursion):\n\n\nint main() {\n    int n;\n    cin >> n;\n    cout << sumTo(n) << \"\\n\";\n    return 0;\n}\n",
+   "challenge": "Write `int sumTo(int n)` that returns 0 when `n` is 0, and otherwise returns `n + sumTo(n - 1)`. Main reads `n` and prints the sum of 1 through n."
+  },
+  {
+   "id": "l29",
+   "xp": 100,
+   "hints": [
+    "The deepest call is climb(0), which does nothing. Then climb(1) finishes and prints 1, then climb(2) prints 2, and so on back up.",
+    "void climb(int n) { if (n == 0) return; climb(n - 1); cout << n << \"\\n\"; }"
+   ],
+   "tests": [
+    {
+     "input": "3",
+     "expected": "1\n2\n3"
+    },
+    {
+     "input": "1",
+     "expected": "1"
+    },
+    {
+     "input": "6",
+     "expected": "1\n2\n3\n4\n5\n6"
+    }
+   ],
+   "title": "Work on the way back",
+   "chapter": "c7",
+   "concept": [
+    "Code AFTER the recursive call runs while the calls unwind, in reverse order. In-order tree printing depends on placing work before, between, or after recursive calls."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\n// void climb(int n)\n// base case: n == 0 does nothing\n// otherwise: recurse on n - 1 FIRST, print n AFTER\n// Write it here:\n\n\nint main() {\n    int n;\n    cin >> n;\n    climb(n);\n    return 0;\n}\n",
+   "challenge": "Write `void climb(int n)` that prints nothing for 0, and otherwise calls `climb(n - 1)` FIRST and prints `n` on its own line AFTER. The result: 1 through n in ascending order, with no loop."
+  },
+  {
+   "id": "l30",
+   "xp": 100,
+   "hints": [
+    "Each node needs new: `tnode *root = new tnode; root->val = r;` then hook children onto root->left and root->right.",
+    "Print with arrows: `cout << root->left->val` reaches through the pointer. The last check is `if (root->left->left == nullptr)`."
+   ],
+   "tests": [
+    {
+     "input": "5 3 8",
+     "expected": "5\n3\n8\nnull"
+    },
+    {
+     "input": "1 2 3",
+     "expected": "1\n2\n3\nnull"
+    },
+    {
+     "input": "9 9 9",
+     "expected": "9\n9\n9\nnull"
+    }
+   ],
+   "title": "A node points to nodes",
+   "chapter": "c7",
+   "concept": [
+    "A tree node holds a value and two pointers to more nodes. An absent child is `nullptr`, and checking for it is the base case of every tree function."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nstruct tnode {\n    int val;\n    tnode *left;\n    tnode *right;\n};\n\nint main() {\n    int r, a, b;\n    cin >> r >> a >> b;\n    // build root with new, attach two children, set all\n    // grandchild pointers to nullptr, then print\n    \n    return 0;\n}\n",
+   "challenge": "Read three ints `r`, `a`, `b`. Build a root node holding `r`, give it a left child holding `a` and a right child holding `b` (grandchildren all null). Print the three values on separate lines, then print **null** if the left child's left pointer is null."
+  },
+  {
+   "id": "l31",
+   "xp": 150,
+   "hints": [
+    "The base case does three things: allocate, set val, null both children. Because t is a reference, that new node is now attached to the tree.",
+    "The recursive case is two lines: `if (v < t->val) insert(t->left, v); else insert(t->right, v);` The reference keeps working at every level down."
+   ],
+   "tests": [
+    {
+     "input": "8 3 10 -1",
+     "expected": "root=8\nleft=3\nright=10"
+    },
+    {
+     "input": "5 7 -1",
+     "expected": "root=5\nleft=none\nright=7"
+    },
+    {
+     "input": "6 -1",
+     "expected": "root=6\nleft=none\nright=none"
+    },
+    {
+     "input": "-1",
+     "expected": "empty"
+    }
+   ],
+   "title": "Recursive insert",
+   "chapter": "c7",
+   "concept": [
+    "THE tree skill: `void insert(tnode *&t, int v)`. The `*&` means t IS the caller's pointer, so assigning a new node to a null t hooks it into the tree. Smaller goes left, otherwise right."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nstruct tnode {\n    int val;\n    tnode *left;\n    tnode *right;\n};\n\n// cppquest: sends a picture of the tree to the visualizer after each step.\n// It writes to cerr (not cout), so it never affects the graded output.\nvoid snapshot(tnode *t, bool top = true) {\n    if (top) cerr << \"@@T \";\n    if (t == nullptr) cerr << \"# \";\n    else { cerr << t->val << \" \"; snapshot(t->left, false); snapshot(t->right, false); }\n    if (top) cerr << endl;\n}\n\n\n// void insert(tnode *&t, int v)\n// t is null: t = new node holding v (children null)\n// v < t->val: recurse into t->left, else into t->right\n// Write it here:\n\n\nint main() {\n    tnode *root = nullptr;\n    int v;\n    snapshot(root);\n    while (cin >> v && v != -1) {\n        insert(root, v);\n        snapshot(root);\n    }\n    if (root == nullptr) {\n        cout << \"empty\\n\";\n        return 0;\n    }\n    cout << \"root=\" << root->val << \"\\n\";\n    if (root->left) cout << \"left=\" << root->left->val << \"\\n\";\n    else cout << \"left=none\\n\";\n    if (root->right) cout << \"right=\" << root->right->val << \"\\n\";\n    else cout << \"right=none\\n\";\n    return 0;\n}\n",
+   "challenge": "Write recursive `insert`. Base case: `t` is null, so make the node right there. Otherwise recurse left when `v < t->val`, else right. Main inserts values until **-1** and reports the root and its two children."
+  },
+  {
+   "id": "l32",
+   "xp": 150,
+   "hints": [
+    "Three statements between the base case and the closing brace, and their ORDER is the whole lesson: left call, cout, right call.",
+    "The null check comes first: `if (t == nullptr) return;` Every tree function you write this semester starts that way."
+   ],
+   "tests": [
+    {
+     "input": "8 3 10 1 6 -1",
+     "expected": "1\n3\n6\n8\n10"
+    },
+    {
+     "input": "5 4 3 2 1 -1",
+     "expected": "1\n2\n3\n4\n5"
+    },
+    {
+     "input": "7 -1",
+     "expected": "7"
+    }
+   ],
+   "title": "In-order traversal",
+   "chapter": "c7",
+   "concept": [
+    "In-order means: all of the left subtree, then me, then all of the right subtree. On a BST that visits values in sorted order, which is how printIt works."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nstruct tnode {\n    int val;\n    tnode *left;\n    tnode *right;\n};\n\n// cppquest: sends a picture of the tree to the visualizer after each step.\n// It writes to cerr (not cout), so it never affects the graded output.\nvoid snapshot(tnode *t, bool top = true) {\n    if (top) cerr << \"@@T \";\n    if (t == nullptr) cerr << \"# \";\n    else { cerr << t->val << \" \"; snapshot(t->left, false); snapshot(t->right, false); }\n    if (top) cerr << endl;\n}\n\n\nvoid insert(tnode *&t, int v) {\n    if (t == nullptr) {\n        t = new tnode;\n        t->val = v;\n        t->left = nullptr;\n        t->right = nullptr;\n        return;\n    }\n    if (v < t->val) insert(t->left, v);\n    else insert(t->right, v);\n}\n\n// void printIt(tnode *t)\n// null: return. Otherwise: left subtree, print val, right subtree.\n// Write it here:\n\n\nint main() {\n    tnode *root = nullptr;\n    int v;\n    snapshot(root);\n    while (cin >> v && v != -1) {\n        insert(root, v);\n        snapshot(root);\n    }\n    printIt(root);\n    return 0;\n}\n",
+   "challenge": "A working `insert` is provided. Write recursive `void printIt(tnode *t)`: return on null, recurse left, print `t->val` on its own line, recurse right. Main inserts until **-1** then calls it, and the output must come out sorted."
+  },
+  {
+   "id": "l33",
+   "xp": 125,
+   "hints": [
+    "Two base cases this time: null tree (false) and no-left-child (found it). Only one recursive case: go left.",
+    "if (t->left == nullptr) { m = t->val; return true; } return findMin(t->left, m); and never look right."
+   ],
+   "tests": [
+    {
+     "input": "8 3 10 1 6 -1",
+     "expected": "min 1"
+    },
+    {
+     "input": "5 7 9 -1",
+     "expected": "min 5"
+    },
+    {
+     "input": "-1",
+     "expected": "empty"
+    }
+   ],
+   "title": "findMin",
+   "chapter": "c7",
+   "concept": [
+    "The smallest value in a BST is the leftmost node: keep going left until there is no left. Remove() needs findMin later, so it gets its own function, in the course's bool-plus-reference style."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nstruct tnode {\n    int val;\n    tnode *left;\n    tnode *right;\n};\n\n// cppquest: sends a picture of the tree to the visualizer after each step.\n// It writes to cerr (not cout), so it never affects the graded output.\nvoid snapshot(tnode *t, bool top = true) {\n    if (top) cerr << \"@@T \";\n    if (t == nullptr) cerr << \"# \";\n    else { cerr << t->val << \" \"; snapshot(t->left, false); snapshot(t->right, false); }\n    if (top) cerr << endl;\n}\n\n\nvoid insert(tnode *&t, int v) {\n    if (t == nullptr) {\n        t = new tnode;\n        t->val = v;\n        t->left = nullptr;\n        t->right = nullptr;\n        return;\n    }\n    if (v < t->val) insert(t->left, v);\n    else insert(t->right, v);\n}\n\n// bool findMin(tnode *t, int &m)\n// Write it here:\n\n\nint main() {\n    tnode *root = nullptr;\n    int v;\n    snapshot(root);\n    while (cin >> v && v != -1) {\n        insert(root, v);\n        snapshot(root);\n    }\n    int m;\n    if (findMin(root, m))\n        cout << \"min \" << m << \"\\n\";\n    else\n        cout << \"empty\\n\";\n    return 0;\n}\n",
+   "challenge": "Write `bool findMin(tnode *t, int &m)` — a loop (as on the board) or recursion, your choice. Empty tree: return **false** without touching `m`. Otherwise store the leftmost value in `m` and return **true**. Main inserts until **-1**, then prints `min X` or `empty`."
+  },
+  {
+   "id": "l34",
+   "xp": 250,
+   "boss": true,
+   "hints": [
+    "The public functions are one-liners: `void grove::insert(int v) { insertHelper(root, v); }` The helpers hold all the recursion, exactly like your l31-l32 code.",
+    "containsHelper has three outcomes: null is false, equal is true, otherwise recurse into the side v belongs on. Mind the const on both declaration and definition."
+   ],
+   "tests": [
+    {
+     "input": "8 3 10 6 -1 6 7",
+     "expected": "3\n6\n8\n10\ncontains 6 true\ncontains 7 false"
+    },
+    {
+     "input": "5 2 9 1 -1 5 1",
+     "expected": "1\n2\n5\n9\ncontains 5 true\ncontains 1 true"
+    },
+    {
+     "input": "4 -1 3",
+     "expected": "4\ncontains 3 false"
+    }
+   ],
+   "title": "Boss: the grove",
+   "chapter": "c7",
+   "concept": [
+    "The full P4 architecture in miniature: a class holding a private root, PUBLIC one-argument functions the user calls, each handing off to a PRIVATE recursive helper that takes the extra node pointer."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nstruct tnode {\n    int val;\n    tnode *left;\n    tnode *right;\n};\n\nclass grove {\n    private:\n        tnode *root;\n        void insertHelper(tnode *&t, int v);\n        bool containsHelper(tnode *t, int v) const;\n        void printHelper(tnode *t) const;\n    public:\n        grove();                 // root starts null\n        void insert(int v);      // calls insertHelper(root, v)\n        bool contains(int v) const;\n        void printIt() const;    // in-order, one value per line\n};\n\n// Define all six member functions here\n\n\nint main() {\n    grove G;\n    int v;\n    while (cin >> v && v != -1)\n        G.insert(v);\n    G.printIt();\n    while (cin >> v)\n        cout << \"contains \" << v << \" \" << (G.contains(v) ? \"true\" : \"false\") << \"\\n\";\n    return 0;\n}\n",
+   "challenge": "Finish `grove`. Public `insert(v)`, `contains(v)`, and `printIt()` each call their recursive private helper on `root`. Insert goes left on smaller, contains searches by comparing, printIt is in-order. Main inserts until **-1**, prints the tree sorted, then runs `contains` on every remaining input."
+  },
+  {
+   "id": "l35",
+   "xp": 125,
+   "hints": [
+    "The condition `cin >> p.key && cin >> p.value` is false at end of input, which stops the loop. This is exactly how the real driver reads.",
+    "Inside the loop: cout << \"(\" << p.key << \",\" << p.value << \")\\n\"; n++; and after it print the count line."
+   ],
+   "tests": [
+    {
+     "input": "10 900\n25 901\n7 902",
+     "expected": "(10,900)\n(25,901)\n(7,902)\nPairs read: 3"
+    },
+    {
+     "input": "3 111",
+     "expected": "(3,111)\nPairs read: 1"
+    },
+    {
+     "input": "",
+     "expected": "Pairs read: 0"
+    }
+   ],
+   "title": "Read the driver",
+   "chapter": "c8",
+   "concept": [
+    "The professor's test driver reads key-value pairs from input until it runs out, then drives your class. Understanding that loop is understanding how you will be graded."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nstruct kvpair {\n    int key;\n    int value;\n};\n\nint main() {\n    kvpair p;\n    int n = 0;\n    // read until end of input, print each pair as (key,value)\n    // then: Pairs read: N\n    \n    return 0;\n}\n",
+   "challenge": "A `kvpair` holds a key and a value. Read pairs until end of input using `while (cin >> p.key && cin >> p.value)`, print each as **(key,value)** on its own line (no spaces inside), then print **Pairs read: N**."
+  },
+  {
+   "id": "l36",
+   "xp": 150,
+   "hints": [
+    "Three cases now, and their order matters: null first (place), equal second (reject), then the two recursive sides. Compare `p.key` against `t->p.key`, never whole pairs.",
+    "The base case builds the node: t = new tnode; t->p = p; t->left = nullptr; t->right = nullptr; return true; and the duplicate case is one line: if (p.key == t->p.key) return false;"
+   ],
+   "tests": [
+    {
+     "input": "40 800\n15 801\n60 802\n15 803\n40 804",
+     "expected": "Key not inserted:  15\nKey not inserted:  40\nTree count is 3"
+    },
+    {
+     "input": "9 500\n9 501\n9 502",
+     "expected": "Key not inserted:  9\nKey not inserted:  9\nTree count is 1"
+    },
+    {
+     "input": "5 100\n2 101\n8 102",
+     "expected": "Tree count is 3"
+    }
+   ],
+   "title": "Insert rejects duplicates",
+   "chapter": "c8",
+   "concept": [
+    "The graded insert returns **false** when the key is already in the tree, and the driver announces every reject. Note the format: two spaces after the colon."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nstruct kvpair {\n    int key;\n    int value;\n};\n\nstruct tnode {\n    kvpair p;\n    tnode *left;\n    tnode *right;\n};\n\n// cppquest: sends a picture of the tree to the visualizer after each step.\n// It writes to cerr (not cout), so it never affects the graded output.\nvoid snapshot(tnode *t, bool top = true) {\n    if (top) cerr << \"@@T \";\n    if (t == nullptr) cerr << \"# \";\n    else { cerr << t->p.key << \" \"; snapshot(t->left, false); snapshot(t->right, false); }\n    if (top) cerr << endl;\n}\n\n\n// bool insert(tnode *&t, kvpair p)\n// t null: hook a new node in, return true\n// p.key == t->p.key: return false (reject the duplicate)\n// smaller keys go left, bigger go right\n// Write it here:\n\n\nint main() {\n    tnode *root = nullptr;\n    kvpair p;\n    int n = 0;\n    snapshot(root);\n    while (cin >> p.key && cin >> p.value) {\n        if (insert(root, p))\n            n++;\n        else\n            cout << \"Key not inserted:  \" << p.key << endl;\n        snapshot(root);\n    }\n    cout << \"Tree count is \" << n << endl;\n    return 0;\n}\n",
+   "challenge": "Write `bool insert(tnode *&t, kvpair p)`: null spot makes the node (true); an **equal key** returns false without changing anything; otherwise recurse by key. The provided main prints **Key not inserted:  X** (two spaces!) per reject, then **Tree count is N**."
+  },
+  {
+   "id": "l37",
+   "xp": 150,
+   "hints": [
+    "Same shape as your l32 code: null check, left call, print, right call. Only the print line changes to the pair format.",
+    "cout << \"(\" << t->p.key << \",\" << t->p.value << \")\" << endl; goes between the two recursive calls."
+   ],
+   "tests": [
+    {
+     "input": "40 800\n15 801\n60 802\n90 803\n27 804",
+     "expected": "Tree count is 5\nTree contents are:\n(15,801)\n(27,804)\n(40,800)\n(60,802)\n(90,803)"
+    },
+    {
+     "input": "12 700\n12 701",
+     "expected": "Tree count is 1\nTree contents are:\n(12,700)"
+    },
+    {
+     "input": "",
+     "expected": "Tree count is 0\nTree contents are:"
+    }
+   ],
+   "title": "printIt, harness style",
+   "chapter": "c8",
+   "concept": [
+    "The driver prints a count line, a header, then calls printIt, which must produce **(key,value)** pairs in ascending key order, one per line. In-order traversal does the sorting for free."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nstruct kvpair {\n    int key;\n    int value;\n};\n\nstruct tnode {\n    kvpair p;\n    tnode *left;\n    tnode *right;\n};\n\n// cppquest: sends a picture of the tree to the visualizer after each step.\n// It writes to cerr (not cout), so it never affects the graded output.\nvoid snapshot(tnode *t, bool top = true) {\n    if (top) cerr << \"@@T \";\n    if (t == nullptr) cerr << \"# \";\n    else { cerr << t->p.key << \" \"; snapshot(t->left, false); snapshot(t->right, false); }\n    if (top) cerr << endl;\n}\n\n\nbool insert(tnode *&t, kvpair p) {\n    if (t == nullptr) {\n        t = new tnode;\n        t->p = p;\n        t->left = nullptr;\n        t->right = nullptr;\n        return true;\n    }\n    if (p.key == t->p.key) return false;\n    if (p.key < t->p.key) return insert(t->left, p);\n    return insert(t->right, p);\n}\n\n// void printIt(tnode *t)\n// in-order: left, then (key,value) on its own line, then right\n// Write it here:\n\n\nint main() {\n    tnode *root = nullptr;\n    kvpair p;\n    int n = 0;\n    snapshot(root);\n    while (cin >> p.key && cin >> p.value) {\n        if (insert(root, p)) n++;\n        snapshot(root);\n    }\n    cout << \"Tree count is \" << n << endl;\n    cout << \"Tree contents are: \" << endl;\n    printIt(root);\n    return 0;\n}\n",
+   "challenge": "A duplicate-rejecting `insert` is provided. Write `void printIt(tnode *t)`: in-order, printing each node as **(key,value)** on its own line. The main prints **Tree count is N** and **Tree contents are:** first, exactly like the real driver."
+  },
+  {
+   "id": "l38",
+   "xp": 150,
+   "hints": [
+    "Mirror getValue's search shape: smaller keys recurse left, bigger recurse right, equal means you found the node to delete.",
+    "The delete pattern: tnode *old = t; then t = (t->left != nullptr) ? t->left : t->right; then delete old; return true; A leaf falls out of the same code because both children are null."
+   ],
+   "tests": [
+    {
+     "input": "40 800\n20 801\n60 802\n10 803\n70 804",
+     "expected": "Delete Count is 2\nTree contents are:\n(40,800)\n(60,802)\n(70,804)"
+    },
+    {
+     "input": "50 900\n25 901\n15 902\n12 903",
+     "expected": "Delete Count is 3\nTree contents are:\n(50,900)"
+    },
+    {
+     "input": "5 100\n80 101",
+     "expected": "Delete Count is 0\nTree contents are:\n(5,100)\n(80,101)"
+    }
+   ],
+   "title": "remove: leaf and one child",
+   "chapter": "c8",
+   "concept": [
+    "Remove has three cases; today is the two easy ones. A **leaf** just gets deleted. A node with **one child** gets replaced by that child. The `tnode *&` reference is what makes the parent's pointer update automatically."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nstruct kvpair {\n    int key;\n    int value;\n};\n\nstruct tnode {\n    kvpair p;\n    tnode *left;\n    tnode *right;\n};\n\n// cppquest: sends a picture of the tree to the visualizer after each step.\n// It writes to cerr (not cout), so it never affects the graded output.\nvoid snapshot(tnode *t, bool top = true) {\n    if (top) cerr << \"@@T \";\n    if (t == nullptr) cerr << \"# \";\n    else { cerr << t->p.key << \" \"; snapshot(t->left, false); snapshot(t->right, false); }\n    if (top) cerr << endl;\n}\n\n\nbool insert(tnode *&t, kvpair p) {\n    if (t == nullptr) {\n        t = new tnode;\n        t->p = p;\n        t->left = nullptr;\n        t->right = nullptr;\n        return true;\n    }\n    if (p.key == t->p.key) return false;\n    if (p.key < t->p.key) return insert(t->left, p);\n    return insert(t->right, p);\n}\n\nvoid printIt(tnode *t) {\n    if (t == nullptr) return;\n    printIt(t->left);\n    cout << \"(\" << t->p.key << \",\" << t->p.value << \")\" << endl;\n    printIt(t->right);\n}\n\n// bool remove(int key, tnode *&t)\n// t null: false. Search left/right by key.\n// Found a leaf or one-child node: save t, repoint t to the child\n// (or nullptr), delete the saved node, return true.\n// Write it here:\n\n\nint main() {\n    tnode *root = nullptr;\n    kvpair p;\n    snapshot(root);\n    while (cin >> p.key && cin >> p.value) {\n        insert(root, p);\n        snapshot(root);\n    }\n    int deleteCount = 0;\n    for (int key = 30; key >= 10; key--)\n        if (remove(key, root)) {\n            deleteCount++;\n            snapshot(root);\n        }\n    cout << \"Delete Count is \" << deleteCount << endl;\n    cout << \"Tree contents are: \" << endl;\n    printIt(root);\n    return 0;\n}\n",
+   "challenge": "Write `bool remove(int key, tnode *&t)` handling: not found (false), leaf, and one-child nodes. The driver sweeps keys from **30 down to 10** counting successes, then prints **Delete Count is N** and the remaining contents. (Two-children nodes are next lesson; this data never needs that case.)"
+  },
+  {
+   "id": "l39",
+   "xp": 175,
+   "hints": [
+    "Order the equal-key case: check for two children FIRST. Only fall through to the save-repoint-delete pattern when at most one child exists.",
+    "The two-children branch is exactly two lines: t->p = findMin(t->right); return remove(t->p.key, t->right); The node object stays; only its pair changes, and the duplicate down in the right subtree gets removed."
+   ],
+   "tests": [
+    {
+     "input": "40 800\n20 801\n60 802\n10 803\n30 804\n50 805\n70 806",
+     "expected": "Delete Count is 5\nTree contents are:\n(10,803)\n(70,806)"
+    },
+    {
+     "input": "50 900\n30 901\n80 902\n20 903\n40 904\n90 905",
+     "expected": "Delete Count is 4\nTree contents are:\n(80,902)\n(90,905)"
+    },
+    {
+     "input": "25 700\n10 701\n75 702",
+     "expected": "Delete Count is 1\nTree contents are:\n(10,701)\n(75,702)"
+    }
+   ],
+   "title": "remove: two children",
+   "chapter": "c8",
+   "concept": [
+    "The hard case: a node with **two** children can't just vanish. Copy the **minimum of the right subtree** into it (the smallest key that is still bigger than everything on the left), then remove that minimum from the right subtree. That minimum has no left child, so removing it is always an easy case."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nstruct kvpair {\n    int key;\n    int value;\n};\n\nstruct tnode {\n    kvpair p;\n    tnode *left;\n    tnode *right;\n};\n\n// cppquest: sends a picture of the tree to the visualizer after each step.\n// It writes to cerr (not cout), so it never affects the graded output.\nvoid snapshot(tnode *t, bool top = true) {\n    if (top) cerr << \"@@T \";\n    if (t == nullptr) cerr << \"# \";\n    else { cerr << t->p.key << \" \"; snapshot(t->left, false); snapshot(t->right, false); }\n    if (top) cerr << endl;\n}\n\n\nbool insert(tnode *&t, kvpair p) {\n    if (t == nullptr) {\n        t = new tnode;\n        t->p = p;\n        t->left = nullptr;\n        t->right = nullptr;\n        return true;\n    }\n    if (p.key == t->p.key) return false;\n    if (p.key < t->p.key) return insert(t->left, p);\n    return insert(t->right, p);\n}\n\nvoid printIt(tnode *t) {\n    if (t == nullptr) return;\n    printIt(t->left);\n    cout << \"(\" << t->p.key << \",\" << t->p.value << \")\" << endl;\n    printIt(t->right);\n}\n\nkvpair findMin(tnode *t) {\n    if (t->left == nullptr) return t->p;\n    return findMin(t->left);\n}\n\n// bool remove(int key, tnode *&t)\n// Same as before, plus: when the found node has BOTH children,\n// copy findMin(t->right) into t->p, then remove that key from t->right.\n// Write it here:\n\n\nint main() {\n    tnode *root = nullptr;\n    kvpair p;\n    snapshot(root);\n    while (cin >> p.key && cin >> p.value) {\n        insert(root, p);\n        snapshot(root);\n    }\n    int deleteCount = 0;\n    for (int key = 60; key >= 20; key--)\n        if (remove(key, root)) {\n            deleteCount++;\n            snapshot(root);\n        }\n    cout << \"Delete Count is \" << deleteCount << endl;\n    cout << \"Tree contents are: \" << endl;\n    printIt(root);\n    return 0;\n}\n",
+   "challenge": "`findMin` is provided (your l33 skill, now returning a `kvpair`). Extend `remove` with the two-children case: copy `findMin(t->right)` into `t->p`, then `return remove(t->p.key, t->right)`. The driver sweeps keys **60 down to 20**, then prints the survivors."
+  },
+  {
+   "id": "l40",
+   "xp": 150,
+   "hints": [
+    "getValue is your l34 containsHelper with one extra assignment before the true. The probe loop finds hits in ascending order automatically because it counts upward.",
+    "clear must recurse BEFORE delete: clear(t->left); clear(t->right); delete t; t = nullptr; Because t is a reference, the caller's pointer really becomes null."
+   ],
+   "tests": [
+    {
+     "input": "31 800\n14 801\n77 802\n56 803\n8 804",
+     "expected": "getValue reports this is in the list: (8,804)\ngetValue reports this is in the list: (14,801)\ngetValue reports this is in the list: (56,803)\nThe cleared tree status:  count = 0"
+    },
+    {
+     "input": "11 900\n33 901\n55 902",
+     "expected": "The cleared tree status:  count = 0"
+    },
+    {
+     "input": "2 500\n4 501\n6 502",
+     "expected": "getValue reports this is in the list: (2,500)\ngetValue reports this is in the list: (4,501)\ngetValue reports this is in the list: (6,502)\nThe cleared tree status:  count = 0"
+    }
+   ],
+   "title": "getValue and clear",
+   "chapter": "c8",
+   "concept": [
+    "Two more graded functions. `getValue` is the bool-plus-reference search: found means fill the reference and return true. `clear` deletes every node **post-order**: both children first, then the node itself, so you never delete a node while still needing its pointers."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nstruct kvpair {\n    int key;\n    int value;\n};\n\nstruct tnode {\n    kvpair p;\n    tnode *left;\n    tnode *right;\n};\n\n// cppquest: sends a picture of the tree to the visualizer after each step.\n// It writes to cerr (not cout), so it never affects the graded output.\nvoid snapshot(tnode *t, bool top = true) {\n    if (top) cerr << \"@@T \";\n    if (t == nullptr) cerr << \"# \";\n    else { cerr << t->p.key << \" \"; snapshot(t->left, false); snapshot(t->right, false); }\n    if (top) cerr << endl;\n}\n\n\nbool insert(tnode *&t, kvpair p) {\n    if (t == nullptr) {\n        t = new tnode;\n        t->p = p;\n        t->left = nullptr;\n        t->right = nullptr;\n        return true;\n    }\n    if (p.key == t->p.key) return false;\n    if (p.key < t->p.key) return insert(t->left, p);\n    return insert(t->right, p);\n}\n\nint countIt(tnode *t) {\n    if (t == nullptr) return 0;\n    return 1 + countIt(t->left) + countIt(t->right);\n}\n\n// bool getValue(int key, int &value, tnode *t)\n// null: false. Equal key: set value from t->p.value, true.\n// Otherwise recurse into the side the key belongs on.\n\n// void clear(tnode *&t)\n// null: done. Clear left, clear right, delete t, set t to nullptr.\n// Write both here:\n\n\nint main() {\n    tnode *root = nullptr;\n    kvpair p;\n    snapshot(root);\n    while (cin >> p.key && cin >> p.value) {\n        insert(root, p);\n        snapshot(root);\n    }\n    for (int key = 0; key < 100; key += 2) {\n        int value;\n        if (getValue(key, value, root)) {\n            cout << \"getValue reports this is in the list: (\";\n            cout << key << \",\" << value << \")\" << endl;\n        }\n    }\n    clear(root);\n    snapshot(root);\n    cout << \"The cleared tree status:  count = \" << countIt(root) << endl;\n    return 0;\n}\n",
+   "challenge": "Write `bool getValue(int key, int &value, tnode *t)` and `void clear(tnode *&t)` (clear must leave `t` null). The driver probes **even keys 0 to 98** printing **getValue reports this is in the list: (key,value)** for hits, clears, then prints **The cleared tree status:  count = 0** (two spaces!) using a recount."
+  },
+  {
+   "id": "l41",
+   "xp": 300,
+   "boss": true,
+   "hints": [
+    "Every public function is one line delegating to its helper on root. nCount changes in exactly three places: insertHelper's base case (up), removeHelper's delete branch (down), and clear (to zero).",
+    "Careful with remove's two-children case and nCount: the recursive removeHelper call on the right subtree already decrements it there, so the two-children branch itself must not touch nCount."
+   ],
+   "tests": [
+    {
+     "input": "30 700\n12 701\n74 702\n45 703\n12 704\n88 705\n52 706\n30 707\n21 708",
+     "expected": "Do Work - START ********************\nKey not inserted:  12\nKey not inserted:  30\nTree count is 7\nTree contents are:\n(12,701)\n(21,708)\n(30,700)\n(45,703)\n(52,706)\n(74,702)\n(88,705)\nDelete Count is 4\nTree count is 3\nTree contents are:\n(52,706)\n(74,702)\n(88,705)\ngetValue reports this is in the list: (52,706)\ngetValue reports this is in the list: (74,702)\ngetValue reports this is in the list: (88,705)\nThe cleared tree status:  count = 0\nDo Work - END   ********************"
+    },
+    {
+     "input": "50 900\n26 901\n80 902\n26 903",
+     "expected": "Do Work - START ********************\nKey not inserted:  26\nTree count is 3\nTree contents are:\n(26,901)\n(50,900)\n(80,902)\nDelete Count is 1\nTree count is 2\nTree contents are:\n(50,900)\n(80,902)\ngetValue reports this is in the list: (50,900)\ngetValue reports this is in the list: (80,902)\nThe cleared tree status:  count = 0\nDo Work - END   ********************"
+    },
+    {
+     "input": "",
+     "expected": "Do Work - START ********************\nTree count is 0\nTree contents are:\nDelete Count is 0\nTree count is 0\nTree contents are:\nThe cleared tree status:  count = 0\nDo Work - END   ********************"
+    }
+   ],
+   "title": "Boss: the full protocol",
+   "chapter": "c8",
+   "concept": [
+    "Everything the real driver does, in one run: read pairs rejecting duplicates, count and print, sweep-delete, count and print again, probe with getValue, clear, and prove the tree is empty. The provided main follows the professor's driver phase for phase, format string for format string."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nstruct kvpair {\n    int key;\n    int value;\n};\n\nstruct tnode {\n    kvpair p;\n    tnode *left;\n    tnode *right;\n};\n\nclass grove {\n    private:\n        tnode *root;\n        unsigned int nCount;\n        bool insertHelper(tnode *&t, kvpair p);\n        bool removeHelper(int key, tnode *&t);\n        kvpair findMin(tnode *t) const;\n        bool getValueHelper(int key, int &value, tnode *t) const;\n        void printHelper(tnode *t) const;\n        void clearHelper(tnode *&t);\n    public:\n        grove();\n        bool insert(kvpair p);      // false on duplicate key; counts successes\n        bool remove(int key);        // counts successful removes down\n        bool getValue(int key, int &value) const;\n        void printIt() const;        // (key,value) per line, ascending\n        unsigned int count() const;\n        void clear();                // empties the tree, nCount back to 0\n};\n\n// Define all the members here\n\n\nint main() {\n    grove G;\n    kvpair p;\n    cout << \"Do Work - START ********************\" << endl;\n    while (cin >> p.key && cin >> p.value) {\n        if (!G.insert(p))\n            cout << \"Key not inserted:  \" << p.key << endl;\n    }\n    cout << \"Tree count is \" << G.count() << endl;\n    cout << \"Tree contents are: \" << endl;\n    G.printIt();\n    int deleteCount = 0;\n    for (int key = 45; key >= 0; key--)\n        if (G.remove(key))\n            deleteCount++;\n    cout << \"Delete Count is \" << deleteCount << endl;\n    cout << \"Tree count is \" << G.count() << endl;\n    cout << \"Tree contents are: \" << endl;\n    G.printIt();\n    for (int key = 0; key < 100; key += 2) {\n        int value;\n        if (G.getValue(key, value)) {\n            cout << \"getValue reports this is in the list: (\";\n            cout << key << \",\" << value << \")\" << endl;\n        }\n    }\n    G.clear();\n    cout << \"The cleared tree status:  count = \" << G.count() << endl;\n    cout << \"Do Work - END   ********************\" << endl;\n    return 0;\n}\n",
+   "challenge": "Finish the `grove` class: public `insert`/`remove`/`getValue`/`printIt`/`count`/`clear` each delegating to a private recursive helper, with `nCount` maintained by insert, remove, and clear. The main is the full protocol; your class must survive all of it."
+  },
+  {
+   "id": "l42",
+   "xp": 175,
+   "boss": false,
+   "hints": [
+    "Override syntax: the same signature as the base, plus the word override. Inside it, `grove::insert(p)` runs the base version. That's the whole idea from class: BST::insert(p), then your extra step.",
+    "`nCount` is protected, so `agrove` can read it directly, exactly like a private member of its own. `main` cannot. That's the entire difference between protected and private."
+   ],
+   "tests": [
+    {
+     "input": "100 1\n200 2\n150 3\n175 4\n",
+     "expected": "insert 100: count 1, height 1, balanced\ninsert 200: count 2, height 2, balanced\ninsert 150: count 3, height 3, UNBALANCED\ninsert 175: count 4, height 4, UNBALANCED\n"
+    },
+    {
+     "input": "50 1\n25 2\n75 3\n60 4\n",
+     "expected": "insert 50: count 1, height 1, balanced\ninsert 25: count 2, height 2, balanced\ninsert 75: count 3, height 2, balanced\ninsert 60: count 4, height 3, balanced\n"
+    },
+    {
+     "input": "10 1\n10 2\n5 3\n",
+     "expected": "insert 10: count 1, height 1, balanced\nKey not inserted:  10\ninsert 5: count 2, height 2, balanced\n"
+    }
+   ],
+   "title": "The base class",
+   "chapter": "c9",
+   "concept": [
+    "A class can be built on top of another class and reuse everything in it. The base class marks the functions it is willing to let a derived class replace as virtual, keeps what the derived class needs in a protected area, and the derived class overrides a function by doing the base's work first and then adding its own step. This is exactly how the balanced tree (P5) will be built on the BST (P4)."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nstruct kvpair { int key; int value; };\nstruct tnode { kvpair p; tnode *left; tnode *right; };\n\n// The base class. Everything a balanced tree will need is already here.\nclass grove {\nprotected:                  // the class itself AND classes built on it may use these; main may not\n    tnode *root;\n    int nCount;\n    bool insertHelper(tnode *&t, kvpair p);\n    int heightHelper(tnode *t) const;\npublic:\n    grove() { root = nullptr; nCount = 0; }\n    virtual bool insert(kvpair p) { return insertHelper(root, p); }   // virtual: a class built on grove may replace this\n    int height() const { return heightHelper(root); }\n    bool balanced() const {\n        if (root == nullptr) return true;\n        int d = heightHelper(root->left) - heightHelper(root->right);\n        return d >= -1 && d <= 1;\n    }\n};\n\nbool grove::insertHelper(tnode *&t, kvpair p) {\n    bool r = false;\n    if (t) {\n        if (p.key < t->p.key)      r = insertHelper(t->left, p);\n        else if (p.key > t->p.key) r = insertHelper(t->right, p);\n    } else {\n        t = new tnode;\n        t->p = p;\n        t->left = t->right = nullptr;\n        nCount++;\n        r = true;\n    }\n    return r;\n}\n\nint grove::heightHelper(tnode *t) const {\n    if (t == nullptr) return 0;\n    int hl = heightHelper(t->left), hr = heightHelper(t->right);\n    return 1 + (hl > hr ? hl : hr);\n}\n\n// Your job: a class built on grove that replaces insert.\n// It must call the base insert to do the real work, and if that succeeded, print one line:\n//   insert K: count N, height H, balanced        (or UNBALANCED)\nclass agrove : public grove {\npublic:\n    bool insert(kvpair p) override {\n        // Write it here:\n        return false;\n    }\n};\n\nint main() {\n    agrove G;\n    grove &T = G;      // main holds it as a plain grove... virtual means agrove's insert still runs\n    kvpair p;\n    while (cin >> p.key && cin >> p.value)\n        if (!T.insert(p)) cout << \"Key not inserted:  \" << p.key << endl;\n    return 0;\n}\n",
+   "challenge": "Complete `agrove`, a class built on `grove`, by overriding `insert`. Call `grove::insert(p)` to do the real work; if it returns **true**, print one line: `insert K: count N, height H, balanced` (or `UNBALANCED`), using the protected `nCount` directly and the provided `height()` and `balanced()`. Return what the base returned. Main holds the object through a `grove &`; because `insert` is virtual, your version still runs."
+  },
+  {
+   "id": "l43",
+   "xp": 175,
+   "boss": false,
+   "hints": [
+    "A leaf has no children, so calcHeight gives 1 + max(0, 0) = 1. That's why the professor's output shows leaves at height 1 and an empty tree at 0.",
+    "insertHelper is the l42 pattern exactly: base first, then your step. Because grove's helper recurses through the virtual function, bal(t) runs at every node on the way back up — you never write a loop to fix all the heights."
+   ],
+   "tests": [
+    {
+     "input": "10 1001\n50 1002\n20 1003\n52 1004\n30 1005\n5 1006\n15 1007\n22 1008\n60 1009\n45 1010\n48 1011\n33 1012\n17 1013\n22 1014\n20 1015\n15 1016\n44 1017\n",
+     "expected": "Key not inserted:  22\nKey not inserted:  20\nKey not inserted:  15\nTree count is 14\nTree contents are: \nAt 0 the value is (5,1006): height = 1\nAt 1 the value is (10,1001): height = 7\nAt 2 the value is (15,1007): height = 2\nAt 3 the value is (17,1013): height = 1\nAt 4 the value is (20,1003): height = 5\nAt 5 the value is (22,1008): height = 1\nAt 6 the value is (30,1005): height = 4\nAt 7 the value is (33,1012): height = 2\nAt 8 the value is (44,1017): height = 1\nAt 9 the value is (45,1010): height = 3\nAt 10 the value is (48,1011): height = 1\nAt 11 the value is (50,1002): height = 6\nAt 12 the value is (52,1004): height = 2\nAt 13 the value is (60,1009): height = 1\n"
+    },
+    {
+     "input": "100 1\n200 2\n150 3\n175 4\n",
+     "expected": "Tree count is 4\nTree contents are: \nAt 0 the value is (100,1): height = 4\nAt 1 the value is (150,3): height = 2\nAt 2 the value is (175,4): height = 1\nAt 3 the value is (200,2): height = 3\n"
+    },
+    {
+     "input": "5 1\n3 2\n8 3\n1 4\n4 5\n",
+     "expected": "Tree count is 5\nTree contents are: \nAt 0 the value is (1,4): height = 1\nAt 1 the value is (3,2): height = 2\nAt 2 the value is (4,5): height = 1\nAt 3 the value is (5,1): height = 3\nAt 4 the value is (8,3): height = 1\n"
+    }
+   ],
+   "title": "AVL: heights",
+   "chapter": "c10",
+   "concept": [
+    "A balanced tree needs to know how tall every subtree is. Each node stores its height (a leaf is 1, an empty tree is 0), the height is recomputed at every node on the way back up the recursion, and the derived class does that by calling the base helper first and then bal(t). Rotations come next lesson; this one is the measuring tape."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nstruct kvpair { int key; int value; };\nstruct tnode { kvpair p; unsigned int h; tnode *left; tnode *right; };\n\n// cppquest: sends a picture of the tree to the visualizer after each step (cerr only, never graded).\nvoid snapshot(tnode *t, bool top = true) {\n    if (top) cerr << \"@@T \";\n    if (t == nullptr) cerr << \"# \";\n    else { cerr << t->p.key << \" \"; snapshot(t->left, false); snapshot(t->right, false); }\n    if (top) cerr << endl;\n}\n\n// The base class, exactly as P4 leaves it for P5: the recursive helpers are virtual.\nclass grove {\nprotected:\n    tnode *root;\n    unsigned int nCount;\n    virtual bool insertHelper(kvpair p, tnode *&t);\n    virtual bool removeHelper(int key, tnode *&t);\n    kvpair findMin(tnode *t) const;\n    bool getValueHelper(int key, int &value, tnode *t) const;\n    void clearHelper(tnode *&t);\npublic:\n    grove() { root = nullptr; nCount = 0; }\n    virtual ~grove() { clearHelper(root); }\n    bool insert(kvpair p) { return insertHelper(p, root); }\n    bool remove(int key) { return removeHelper(key, root); }\n    bool getValue(int key, int &value) const { return getValueHelper(key, value, root); }\n    unsigned int count() const { return nCount; }\n    void clear() { clearHelper(root); nCount = 0; root = nullptr; }\n    tnode *rootNode() const { return root; }\n};\n\nbool grove::insertHelper(kvpair p, tnode *&t) {\n    bool r = false;\n    if (t) {\n        if (p.key < t->p.key)      r = insertHelper(p, t->left);\n        else if (p.key > t->p.key) r = insertHelper(p, t->right);\n    } else {\n        t = new tnode; t->p = p; t->h = 1; t->left = t->right = nullptr;\n        nCount++;\n        r = true;\n    }\n    return r;\n}\nkvpair grove::findMin(tnode *t) const { while (t->left) t = t->left; return t->p; }\nbool grove::removeHelper(int key, tnode *&t) {\n    if (t == nullptr) return false;\n    if (key < t->p.key) return removeHelper(key, t->left);\n    if (key > t->p.key) return removeHelper(key, t->right);\n    if (t->left && t->right) {\n        t->p = findMin(t->right);\n        return removeHelper(t->p.key, t->right);\n    }\n    tnode *dead = t;\n    t = t->left ? t->left : t->right;\n    delete dead;\n    nCount--;\n    return true;\n}\nbool grove::getValueHelper(int key, int &value, tnode *t) const {\n    if (t == nullptr) return false;\n    if (key < t->p.key) return getValueHelper(key, value, t->left);\n    if (key > t->p.key) return getValueHelper(key, value, t->right);\n    value = t->p.value;\n    return true;\n}\nvoid grove::clearHelper(tnode *&t) {\n    if (t == nullptr) return;\n    clearHelper(t->left); clearHelper(t->right);\n    delete t; t = nullptr;\n}\n\nint max(int a, int b) { return a > b ? a : b; }\n\n// The balanced tree, built on grove. This lesson: heights only. Rotations are next lesson.\nclass agrove : public grove {\nprotected:\n    unsigned int height(tnode *t) const;        // 0 for an empty tree, else the node's h\n    unsigned int calcHeight(tnode *t) const;    // 1 + the taller child (a leaf is 1)\nprivate:\n    bool doBal;\n    void bal(tnode *&t);                        // this lesson: if t is real, set its height\n    bool insertHelper(kvpair p, tnode *&t) override;   // grove's insert, then bal(t)\n    void printIt(tnode *t, unsigned int &index) const;\npublic:\n    agrove(bool doBal) : grove() { this->doBal = doBal; }\n    using grove::insert;\n    void printIt() const { unsigned int index = 0; printIt(root, index); }\n};\n\nvoid agrove::printIt(tnode *t, unsigned int &index) const {\n    if (t == nullptr) return;\n    printIt(t->left, index);\n    cout << \"At \" << index << \" the value is (\" << t->p.key << \",\" << t->p.value << \"): height = \" << t->h << endl;\n    index++;\n    printIt(t->right, index);\n}\n\n// Write these four here:\nunsigned int agrove::height(tnode *t) const {\n    return 0;\n}\nunsigned int agrove::calcHeight(tnode *t) const {\n    return 0;\n}\nvoid agrove::bal(tnode *&t) {\n}\nbool agrove::insertHelper(kvpair p, tnode *&t) {\n    return false;\n}\n\nint main() {\n    agrove G(false);\n    kvpair p;\n    snapshot(G.rootNode());\n    while (cin >> p.key && cin >> p.value) {\n        if (!G.insert(p)) cout << \"Key not inserted:  \" << p.key << endl;\n        snapshot(G.rootNode());\n    }\n    cout << \"Tree count is \" << G.count() << endl;\n    cout << \"Tree contents are: \" << endl;\n    G.printIt();\n    return 0;\n}\n",
+   "challenge": "Complete `agrove`'s four functions: `height(t)` returns 0 for an empty tree, else `t->h`. `calcHeight(t)` returns 1 + the taller child's height (use `max`). `bal(t)` (no rotations yet): if `t` is real, set `t->h = calcHeight(t)`. `insertHelper` overrides the base: call `grove::insertHelper(p, t)`, then `bal(t)`, return what the base returned. Main inserts pairs then prints `At i the value is (k,v): height = h` in order — the real P5 format."
+  },
+  {
+   "id": "l44",
+   "xp": 300,
+   "boss": true,
+   "hints": [
+    "Order inside a rotation matters: move the middle subtree first, then hang t1 under t2, then recompute heights bottom-up (t1 before t2), and only then assign t1 = t2 through the reference.",
+    "The kink test: left heavy, but height(t->left->left) < height(t->left->right) → the weight is in the inner grandchild. rotateLeft(t->left) first straightens it into a plain left-left case; then rotateRight(t) fixes it."
+   ],
+   "tests": [
+    {
+     "input": "10 1001\n50 1002\n20 1003\n52 1004\n30 1005\n5 1006\n15 1007\n22 1008\n60 1009\n45 1010\n48 1011\n33 1012\n17 1013\n22 1014\n20 1015\n15 1016\n44 1017\n",
+     "expected": "Do Work #1 - START ********************\nKey not inserted:  22\nKey not inserted:  20\nKey not inserted:  15\nTree count is 14\nTree contents are: \nAt 0 the value is (5,1006): height = 1\nAt 1 the value is (10,1001): height = 2\nAt 2 the value is (15,1007): height = 3\nAt 3 the value is (17,1013): height = 1\nAt 4 the value is (20,1003): height = 2\nAt 5 the value is (22,1008): height = 1\nAt 6 the value is (30,1005): height = 5\nAt 7 the value is (33,1012): height = 2\nAt 8 the value is (44,1017): height = 1\nAt 9 the value is (45,1010): height = 3\nAt 10 the value is (48,1011): height = 1\nAt 11 the value is (50,1002): height = 4\nAt 12 the value is (52,1004): height = 2\nAt 13 the value is (60,1009): height = 1\n\nRemove Count is 6\nTree count is 8\nTree contents are: \nAt 0 the value is (30,1005): height = 1\nAt 1 the value is (33,1012): height = 2\nAt 2 the value is (44,1017): height = 1\nAt 3 the value is (45,1010): height = 4\nAt 4 the value is (48,1011): height = 1\nAt 5 the value is (50,1002): height = 3\nAt 6 the value is (52,1004): height = 2\nAt 7 the value is (60,1009): height = 1\n\ngetValue for key 30 reports this value is in the tree: 1005\ngetValue for key 44 reports this value is in the tree: 1017\ngetValue for key 48 reports this value is in the tree: 1011\ngetValue for key 50 reports this value is in the tree: 1002\ngetValue for key 52 reports this value is in the tree: 1004\ngetValue for key 60 reports this value is in the tree: 1009\n\nThe cleared tree status:  count = 0\nThe cleared tree contents follow:\nDo Work #1 - END   ********************\n"
+    },
+    {
+     "input": "100 1\n200 2\n150 3\n175 4\n125 5\n",
+     "expected": "Do Work #1 - START ********************\nTree count is 5\nTree contents are: \nAt 0 the value is (100,1): height = 2\nAt 1 the value is (125,5): height = 1\nAt 2 the value is (150,3): height = 3\nAt 3 the value is (175,4): height = 1\nAt 4 the value is (200,2): height = 2\n\nRemove Count is 0\nTree count is 5\nTree contents are: \nAt 0 the value is (100,1): height = 2\nAt 1 the value is (125,5): height = 1\nAt 2 the value is (150,3): height = 3\nAt 3 the value is (175,4): height = 1\nAt 4 the value is (200,2): height = 2\n\n\nThe cleared tree status:  count = 0\nThe cleared tree contents follow:\nDo Work #1 - END   ********************\n"
+    },
+    {
+     "input": "1 1\n2 2\n3 3\n4 4\n5 5\n6 6\n7 7\n",
+     "expected": "Do Work #1 - START ********************\nTree count is 7\nTree contents are: \nAt 0 the value is (1,1): height = 1\nAt 1 the value is (2,2): height = 2\nAt 2 the value is (3,3): height = 1\nAt 3 the value is (4,4): height = 3\nAt 4 the value is (5,5): height = 1\nAt 5 the value is (6,6): height = 2\nAt 6 the value is (7,7): height = 1\n\nRemove Count is 7\nTree count is 0\nTree contents are: \n\n\nThe cleared tree status:  count = 0\nThe cleared tree contents follow:\nDo Work #1 - END   ********************\n"
+    }
+   ],
+   "title": "Boss: rotations",
+   "chapter": "c10",
+   "concept": [
+    "When an insert or remove leaves a node two levels heavier on one side, one or two rotations fix it locally: a right rotation for a left-heavy node, a left rotation for a right-heavy one, with the opposite rotation on the child first when the heaviness is a kink. Done at every node on the unwind, this keeps the tree's height near log n — which is the entire point."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nstruct kvpair { int key; int value; };\nstruct tnode { kvpair p; unsigned int h; tnode *left; tnode *right; };\n\n// cppquest: sends a picture of the tree to the visualizer after each step (cerr only, never graded).\nvoid snapshot(tnode *t, bool top = true) {\n    if (top) cerr << \"@@T \";\n    if (t == nullptr) cerr << \"# \";\n    else { cerr << t->p.key << \" \"; snapshot(t->left, false); snapshot(t->right, false); }\n    if (top) cerr << endl;\n}\n\n// The base class, exactly as P4 leaves it for P5: the recursive helpers are virtual.\nclass grove {\nprotected:\n    tnode *root;\n    unsigned int nCount;\n    virtual bool insertHelper(kvpair p, tnode *&t);\n    virtual bool removeHelper(int key, tnode *&t);\n    kvpair findMin(tnode *t) const;\n    bool getValueHelper(int key, int &value, tnode *t) const;\n    void clearHelper(tnode *&t);\npublic:\n    grove() { root = nullptr; nCount = 0; }\n    virtual ~grove() { clearHelper(root); }\n    bool insert(kvpair p) { return insertHelper(p, root); }\n    bool remove(int key) { return removeHelper(key, root); }\n    bool getValue(int key, int &value) const { return getValueHelper(key, value, root); }\n    unsigned int count() const { return nCount; }\n    void clear() { clearHelper(root); nCount = 0; root = nullptr; }\n    tnode *rootNode() const { return root; }\n};\n\nbool grove::insertHelper(kvpair p, tnode *&t) {\n    bool r = false;\n    if (t) {\n        if (p.key < t->p.key)      r = insertHelper(p, t->left);\n        else if (p.key > t->p.key) r = insertHelper(p, t->right);\n    } else {\n        t = new tnode; t->p = p; t->h = 1; t->left = t->right = nullptr;\n        nCount++;\n        r = true;\n    }\n    return r;\n}\nkvpair grove::findMin(tnode *t) const { while (t->left) t = t->left; return t->p; }\nbool grove::removeHelper(int key, tnode *&t) {\n    if (t == nullptr) return false;\n    if (key < t->p.key) return removeHelper(key, t->left);\n    if (key > t->p.key) return removeHelper(key, t->right);\n    if (t->left && t->right) {\n        t->p = findMin(t->right);\n        return removeHelper(t->p.key, t->right);\n    }\n    tnode *dead = t;\n    t = t->left ? t->left : t->right;\n    delete dead;\n    nCount--;\n    return true;\n}\nbool grove::getValueHelper(int key, int &value, tnode *t) const {\n    if (t == nullptr) return false;\n    if (key < t->p.key) return getValueHelper(key, value, t->left);\n    if (key > t->p.key) return getValueHelper(key, value, t->right);\n    value = t->p.value;\n    return true;\n}\nvoid grove::clearHelper(tnode *&t) {\n    if (t == nullptr) return;\n    clearHelper(t->left); clearHelper(t->right);\n    delete t; t = nullptr;\n}\n\nint max(int a, int b) { return a > b ? a : b; }\n\nclass agrove : public grove {\nprotected:\n    unsigned int height(tnode *t) const { return t == nullptr ? 0 : t->h; }\n    unsigned int calcHeight(tnode *t) const { return t == nullptr ? 0 : 1 + max(height(t->left), height(t->right)); }\nprivate:\n    bool doBal;\n    void rotateRight(tnode *&t1);   // t1 is LEFT heavy: its left child takes its place\n    void rotateLeft(tnode *&t1);    // t1 is RIGHT heavy: its right child takes its place\n    void bal(tnode *&t);            // !doBal: just set height. doBal: fix a 2-heavy node with rotations\n    bool insertHelper(kvpair p, tnode *&t) override { bool r = grove::insertHelper(p, t); bal(t); return r; }\n    bool removeHelper(int key, tnode *&t) override { bool r = grove::removeHelper(key, t); bal(t); return r; }\n    void printIt(tnode *t, unsigned int &index) const;\npublic:\n    agrove(bool doBal) : grove() { this->doBal = doBal; }\n    using grove::insert;\n    using grove::remove;\n    void printIt() const { unsigned int index = 0; printIt(root, index); }\n};\n\nvoid agrove::printIt(tnode *t, unsigned int &index) const {\n    if (t == nullptr) return;\n    printIt(t->left, index);\n    cout << \"At \" << index << \" the value is (\" << t->p.key << \",\" << t->p.value << \"): height = \" << t->h << endl;\n    index++;\n    printIt(t->right, index);\n}\n\n// Write these three here:\nvoid agrove::rotateRight(tnode *&t1) {\n}\nvoid agrove::rotateLeft(tnode *&t1) {\n}\nvoid agrove::bal(tnode *&t) {\n    if (t == nullptr) return;\n    t->h = calcHeight(t);\n}\n\nint main() {\n    agrove G(true);\n    kvpair p;\n    int key, value, removeCount;\n    cout << \"Do Work #1 - START ********************\" << endl;\n    snapshot(G.rootNode());\n    while (cin >> p.key && cin >> p.value) {\n        if (!G.insert(p)) cout << \"Key not inserted:  \" << p.key << endl;\n        snapshot(G.rootNode());\n    }\n    cout << \"Tree count is \" << G.count() << endl;\n    cout << \"Tree contents are: \" << endl;\n    G.printIt();\n    removeCount = 0;\n    for (key = 25; key >= 0; key--)\n        if (G.remove(key)) { removeCount++; snapshot(G.rootNode()); }\n    cout << endl << \"Remove Count is \" << removeCount << endl;\n    cout << \"Tree count is \" << G.count() << endl;\n    cout << \"Tree contents are: \" << endl;\n    G.printIt();\n    cout << endl;\n    for (key = 0; key < 100; key += 2) {\n        value = -8888;\n        if (G.getValue(key, value)) {\n            cout << \"getValue for key \" << key;\n            cout << \" reports this value is in the tree: \" << value << endl;\n        }\n    }\n    G.clear();\n    snapshot(G.rootNode());\n    cout << endl << \"The cleared tree status:  count = \" << G.count() << endl;\n    cout << \"The cleared tree contents follow:\" << endl;\n    G.printIt();\n    cout << \"Do Work #1 - END   ********************\" << endl;\n    return 0;\n}\n",
+   "challenge": "Write `rotateRight`, `rotateLeft`, and the balancing branches of `bal`. `rotateRight(t1)`: `t1` is left heavy — its left child `t2` takes its place: `t1->left = t2->right; t2->right = t1;` then fix `t1->h` and `t2->h` (in that order) and set `t1 = t2`. `rotateLeft` is the mirror. `bal(t)`: if `!doBal` just set the height; otherwise compare `height(t->left)` and `height(t->right)`: a difference of 2 means rotate — and if the heavy child leans the *other* way (a kink), rotate that child the opposite direction first. Main runs the professor's full P5 protocol; test 1 must match his `AVLcorrectOutput` exactly."
+  }
+ ]
+}

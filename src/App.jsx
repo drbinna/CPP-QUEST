@@ -19,6 +19,7 @@ import BSTViz from "./viz.jsx";
 import RecViz from "./recviz.jsx";
 import LiveTree, { TreeLab } from "./livetree.jsx";
 import Arena from "./arena.jsx";
+import Workbench from "./workbench.jsx";
 import { parseSnapshots } from "./livetree.js";
 
 const cleanErr = (s) => String(s || "").split("\n").filter((l) => !l.trim().startsWith("@@T")).join("\n").trim();
@@ -89,6 +90,7 @@ export default function CppQuest() {
   const [code, setCode] = useState("");
   const [running, setRunning] = useState(false);
   const [arena, setArena] = useState(false);
+  const [bench, setBench] = useState(false);
   const [result, setResult] = useState(null);
   const [openHints, setOpenHints] = useState({});
   const [aiHint, setAiHint] = useState({ loading: false, text: "", error: "" });
@@ -169,6 +171,18 @@ export default function CppQuest() {
         body: JSON.stringify([{ name: clean, xp: s.xp, level: levelOf(s.xp).level, done: s.done.length, updated_at: new Date().toISOString() }]),
       });
     } catch { /* leaderboard is best-effort */ }
+  };
+
+  // One-shot compile+run for the Workbench shell: returns {compileErr|netErr|stdout,stderr,exit}
+  const compileOnce = async (code, input = "") => {
+    try {
+      const res = await fetch(COMPILE_API, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${ANON_KEY}`, apikey: ANON_KEY }, body: JSON.stringify({ code, tests: [{ input, expected: "" }] }) });
+      const data = await res.json();
+      if (data.error) return { netErr: data.error };
+      if (data.compile_error) return { compileErr: data.compile_error };
+      const o = data.outcomes?.[0] || {};
+      return { stdout: o.got || "", stderr: cleanErr(o.stderr || ""), exit: o.exit_code || 0 };
+    } catch (err) { return { netErr: String(err) }; }
   };
 
   const runSummary = () => {
@@ -330,7 +344,8 @@ export default function CppQuest() {
       <header style={{ borderBottom: `1px solid ${C.line}`, background: C.panel, flexShrink: 0 }} className="flex items-center gap-4 px-4 py-2.5 flex-wrap">
         <button className="cq-btn" onClick={() => setMapOpen(true)} style={btn({ padding: "6px 12px" })} aria-label="Open lesson map">☰</button>
         <button className="cq-btn" onClick={() => setTopicsOpen(true)} style={btn({ padding: "6px 12px", color: C.gold, border: `1px solid ${C.gold}` })} aria-label="Choose a topic">📚 Topics</button>
-        <button className="cq-btn" onClick={() => setArena(!arena)} style={btn({ padding: "6px 12px", color: arena ? C.ink : C.teal, background: arena ? C.teal : undefined, border: `1px solid ${C.teal}` })} aria-label="Tree Arena game">🎮 Arena</button>
+        <button className="cq-btn" onClick={() => { setArena(false); setBench(!bench); }} style={btn({ padding: "6px 12px", color: bench ? C.ink : C.text, background: bench ? C.text : undefined, border: `1px solid ${C.text}` })} aria-label="Workbench: the four-window build loop" title="Dr. Wheat's four windows: header, implementation, driver + Makefile, shell">🖥 Workbench</button>
+        <button className="cq-btn" onClick={() => { setBench(false); setArena(!arena); }} style={btn({ padding: "6px 12px", color: arena ? C.ink : C.teal, background: arena ? C.teal : undefined, border: `1px solid ${C.teal}` })} aria-label="Tree Arena game">🎮 Arena</button>
         <div style={{ fontFamily: MONO, fontSize: 17, fontWeight: 700, letterSpacing: -0.5 }}>
           cpp<span style={{ color: C.gold }}>quest</span>
         </div>
@@ -370,7 +385,11 @@ export default function CppQuest() {
             if (xp > 0) setBurst({ xp, levelUp: false, badges: [] });
           }} />
       )}
-      <div className="flex flex-1 flex-col lg:flex-row" style={{ minHeight: 0, display: arena ? "none" : undefined }}>
+      {bench && (
+        <Workbench compile={compileOnce} onClose={() => setBench(false)} tourDone={!!state.benchTour}
+          onFinish={({ xp }) => { setState((s) => ({ ...s, xp: s.xp + xp, benchTour: true })); setBurst({ xp, levelUp: false, badges: [] }); }} />
+      )}
+      <div className="flex flex-1 flex-col lg:flex-row" style={{ minHeight: 0, display: arena || bench ? "none" : undefined }}>
         {/* LEFT: lesson content, challenge, hints */}
         <div className="overflow-y-auto p-6 w-full" style={{ maxWidth: "44rem", flexShrink: 0, borderRight: `1px solid ${C.line}` }}>
           <div style={{ fontFamily: MONO, fontSize: 12, color: C.muted }} className="mb-1">Lesson {idx + 1} of {LESSONS.length}</div>

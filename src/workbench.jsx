@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { CppTokens } from "./cpphl.jsx";
+import { NOTES, FILE_INTRO, WALK_ORDER } from "./workbench_notes.js";
 
 // ---------------------------------------------------------------------------
 // Workbench: Dr. Wheat's four-window screen, recreated.
@@ -391,6 +392,25 @@ const fmtTime = (ms) => {
 };
 const pad = (s, n) => String(s).padStart(n, " ");
 
+// Resolve the notes against the files as they stand: each note's `m` is found in order
+// within its file, so repeated lines map to the right place. Returns a flat walk list.
+function resolveNotes(fs) {
+  const last = {}, walk = [];
+  for (const n of NOTES) {
+    const src = fs[n.file]?.content; if (src == null) continue;
+    const lines = src.split("\n"); const start = (last[n.file] ?? -1) + 1;
+    let at = -1;
+    for (let i = start; i < lines.length; i++) if (lines[i].includes(n.m)) { at = i; break; }
+    if (at < 0) continue;
+    last[n.file] = at;
+    walk.push({ ...n, line: at + 1, code: lines[at] });
+  }
+  walk.sort((a, b) => WALK_ORDER.indexOf(a.file) - WALK_ORDER.indexOf(b.file) || a.line - b.line);
+  const find = (file, m) => walk.find((w) => w.file === file && w.code.includes(m));
+  walk.forEach((w) => { w.links = (w.link || []).map((l) => find(l.file, l.m)).filter(Boolean); });
+  return walk;
+}
+
 // ---------------------------------------------------------------------------
 // Rich text for callouts
 // ---------------------------------------------------------------------------
@@ -411,10 +431,14 @@ function Rich({ text, size = 13.5, color = C.text }) {
 // ---------------------------------------------------------------------------
 // A vim-looking editor pane
 // ---------------------------------------------------------------------------
-function VimPane({ name, value, onChange, highlight, onHelp, tabs, tab, onTab, dirty }) {
+function VimPane({ name, value, onChange, highlight, onHelp, tabs, tab, onTab, dirty, explain, focusLine, linkLines, notedLines, onPickLine }) {
   const [cursor, setCursor] = useState({ line: 1, col: 1 });
-  const hl = useRef(null), gut = useRef(null), ta = useRef(null);
+  const hl = useRef(null), gut = useRef(null), ta = useRef(null), focusRef = useRef(null), roRef = useRef(null);
   const lines = value.split("\n");
+  useEffect(() => {
+    const el = roRef.current, f = focusRef.current; if (!explain || !el || !f) return;
+    el.scrollTop = Math.max(0, f.offsetTop - el.clientHeight / 2 + 9); // scroll only this pane, never the page
+  }, [explain, focusLine, name]);
   const fill = Math.max(0, 40 - lines.length);
   const textStyle = { fontFamily: MONO, fontSize: 12.5, lineHeight: "18px", padding: "6px 10px 6px 0", tabSize: 4, whiteSpace: "pre", margin: 0, border: "none", boxSizing: "border-box" };
   const updCursor = () => {
@@ -438,6 +462,21 @@ function VimPane({ name, value, onChange, highlight, onHelp, tabs, tab, onTab, d
           <button key={t} className="cq-btn" onClick={() => onTab(t)} style={{ fontFamily: MONO, fontSize: 11, padding: "1px 8px", borderRadius: 4, border: `1px solid ${t === tab ? C.gold : "#444"}`, color: t === tab ? C.gold : "#aaa", background: t === tab ? "#2a2410" : "transparent", cursor: "pointer" }}>{t}</button>
         )) : null}
       </TitleBar>
+      {explain ? (
+        <div ref={roRef} className="flex-1" style={{ minHeight: 0, overflow: "auto", position: "relative", fontFamily: MONO, fontSize: 12.5, lineHeight: "18px", padding: "6px 0" }}>
+          {lines.map((l, i) => {
+            const n = i + 1, isFocus = focusLine === n, isLink = linkLines?.has(n), has = notedLines?.has(n);
+            return (
+              <div key={i} ref={isFocus ? focusRef : null} onClick={() => has && onPickLine(name, n)} title={has ? "Explain this line" : undefined}
+                style={{ display: "flex", whiteSpace: "pre", cursor: has ? "pointer" : "default", background: isFocus ? "#3a2f0e" : isLink ? "#0f2f2a" : "transparent", borderLeft: `3px solid ${isFocus ? C.gold : isLink ? C.teal : "transparent"}`, color: "#e6e6e6", opacity: has || !l.trim() ? 1 : 0.55 }}>
+                <span style={{ width: 31, textAlign: "right", paddingRight: 8, color: isFocus ? C.gold : isLink ? C.teal : has ? "#8a8a8a" : "#4a4a4a", flexShrink: 0, userSelect: "none" }}>{n}</span>
+                <span style={{ tabSize: 4 }}>{isMake ? <MakeTokens code={l} /> : <CppTokens code={l} />}{l === "" ? " " : ""}</span>
+              </div>
+            );
+          })}
+          {Array.from({ length: fill }, (_, i) => <div key={"f" + i} style={{ color: "#3b6ea8", paddingLeft: 6 }}>~</div>)}
+        </div>
+      ) : (
       <div className="flex-1 flex" style={{ minHeight: 0, position: "relative" }}>
         <div ref={gut} aria-hidden="true" style={{ ...textStyle, width: 34, color: "#5a5a5a", textAlign: "right", paddingRight: 8, paddingLeft: 0, overflow: "hidden", userSelect: "none", flexShrink: 0 }}>
           {lines.map((_, i) => <div key={i}>{i + 1}</div>)}
@@ -454,10 +493,11 @@ function VimPane({ name, value, onChange, highlight, onHelp, tabs, tab, onTab, d
             style={{ ...textStyle, position: "absolute", inset: 0, width: "100%", height: "100%", background: "transparent", color: "transparent", caretColor: "#fff", resize: "none", outline: "none", overflow: "auto" }} />
         </div>
       </div>
+      )}
       <div className="flex items-center" style={{ fontFamily: MONO, fontSize: 11.5, color: "#ddd", background: "#1a1a1a", padding: "2px 8px", borderTop: "1px solid #2a2a2a", gap: 12 }}>
-        <span>"{name}"{dirty ? " [+]" : ""} {lines.length}L</span>
+        <span>"{name}"{dirty ? " [+]" : ""} {lines.length}L{explain ? " [RO]" : ""}</span>
         <span className="flex-1" />
-        <span>{cursor.line},{cursor.col}</span>
+        <span>{explain ? (focusLine || 1) + ",1" : `${cursor.line},${cursor.col}`}</span>
         <span style={{ width: 28, textAlign: "right" }}>{lines.length <= 40 ? "All" : cursor.line < 20 ? "Top" : "…"}</span>
       </div>
     </div>
@@ -465,14 +505,15 @@ function VimPane({ name, value, onChange, highlight, onHelp, tabs, tab, onTab, d
 }
 
 function MakeTokens({ code }) {
-  return code.split("\n").map((l, i) => {
+  const ls = code.split("\n"); const one = ls.length === 1;
+  return ls.map((l, i) => {
     let el;
     if (/^\s*#/.test(l)) el = <span style={{ color: "#7FB56F", fontStyle: "italic" }}>{l}</span>;
     else if (/^[A-Za-z_]\w*\s*[:?]?=/.test(l)) { const [, k, rest] = l.match(/^([A-Za-z_]\w*)(.*)$/); el = <><span style={{ color: "#F2B84B" }}>{k}</span>{rest}</>; }
     else if (/^[^\t\s][^:]*:/.test(l)) { const [, t, rest] = l.match(/^([^:]*)(.*)$/); el = <><span style={{ color: "#6FB3F2", fontWeight: 700 }}>{t}</span><span style={{ color: "#B89CF2" }}>{rest}</span></>; }
     else if (l.startsWith("\t")) el = <span style={{ color: "#e6e6e6" }}>{l.replace(/\$\((\w+)\)/g, "$($1)")}</span>;
     else el = l;
-    return <span key={i}>{el}{"\n"}</span>;
+    return <span key={i}>{el}{one ? "" : "\n"}</span>;
   });
 }
 
@@ -542,6 +583,20 @@ export default function Workbench({ compile, onClose, onFinish, tourDone }) {
   const [busy, setBusy] = useState(false);
   const [rightTab, setRightTab] = useState("bagMain.cpp");
   const [help, setHelp] = useState(null);
+  const [explain, setExplain] = useState(false);
+  const [noteIdx, setNoteIdx] = useState(0);
+  const walk = useMemo(() => resolveNotes(fs), [fs]);
+  const note = explain ? walk[Math.min(noteIdx, walk.length - 1)] : null;
+  const notedLines = useMemo(() => { const m = {}; walk.forEach((w) => { (m[w.file] ||= new Set()).add(w.line); }); return m; }, [walk]);
+  const linkLines = useMemo(() => { const m = {}; (note?.links || []).forEach((l) => { (m[l.file] ||= new Set()).add(l.line); }); return m; }, [note]);
+  const showNote = (i) => {
+    const w = walk[i]; if (!w) return;
+    setNoteIdx(i);
+    if (w.file === "bagMain.cpp" || w.file === "Makefile") setRightTab(w.file);
+    setMobilePane(w.file === "Makefile" ? "bagMain.cpp" : w.file);
+  };
+  const pickLine = (file, line) => { const i = walk.findIndex((w) => w.file === file && w.line === line); if (i >= 0) showNote(i); };
+  const firstOfFile = (file) => walk.findIndex((w) => w.file === file);
   const [step, setStep] = useState(tourDone ? -1 : 0);
   const [wide, setWide] = useState(() => window.matchMedia("(min-width: 1100px)").matches);
   const [mobilePane, setMobilePane] = useState("bag.h");
@@ -754,10 +809,11 @@ export default function Workbench({ compile, onClose, onFinish, tourDone }) {
 
   const cur = step >= 0 ? TOUR[step] : null;
   const hiPane = cur?.pane;
+  const ex = (file) => ({ explain, focusLine: note?.file === file ? note.line : null, linkLines: linkLines[file], notedLines: notedLines[file], onPickLine: pickLine });
   const panes = {
-    "bag.h": <VimPane name="bag.h" value={fs["bag.h"]?.content ?? ""} onChange={(v) => setFile("bag.h", v)} highlight={hiPane === "bag.h"} onHelp={() => setHelp("bag.h")} />,
-    "bag.cpp": <VimPane name="bag.cpp" value={fs["bag.cpp"]?.content ?? ""} onChange={(v) => setFile("bag.cpp", v)} highlight={hiPane === "bag.cpp"} onHelp={() => setHelp("bag.cpp")} />,
-    "bagMain.cpp": <VimPane name={rightTab} value={fs[rightTab]?.content ?? ""} onChange={(v) => setFile(rightTab, v)} highlight={hiPane === "bagMain.cpp"} onHelp={() => setHelp("bagMain.cpp")} tabs={["bagMain.cpp", "Makefile"]} tab={rightTab} onTab={setRightTab} />,
+    "bag.h": <VimPane name="bag.h" value={fs["bag.h"]?.content ?? ""} onChange={(v) => setFile("bag.h", v)} highlight={hiPane === "bag.h" || (explain && note?.file === "bag.h")} onHelp={() => setHelp("bag.h")} {...ex("bag.h")} />,
+    "bag.cpp": <VimPane name="bag.cpp" value={fs["bag.cpp"]?.content ?? ""} onChange={(v) => setFile("bag.cpp", v)} highlight={hiPane === "bag.cpp" || (explain && note?.file === "bag.cpp")} onHelp={() => setHelp("bag.cpp")} {...ex("bag.cpp")} />,
+    "bagMain.cpp": <VimPane name={rightTab} value={fs[rightTab]?.content ?? ""} onChange={(v) => setFile(rightTab, v)} highlight={hiPane === "bagMain.cpp" || (explain && note?.file === rightTab)} onHelp={() => setHelp("bagMain.cpp")} tabs={["bagMain.cpp", "Makefile"]} tab={rightTab} onTab={setRightTab} {...ex(rightTab)} />,
     shell: <ShellPane lines={lines} onCommand={onCommand} busy={busy} highlight={hiPane === "shell"} onHelp={() => setHelp("shell")} inputRef={inputRef} />,
   };
   const btn = (extra = {}) => ({ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 7, border: `1px solid ${C.line}`, color: C.muted, background: "transparent", cursor: "pointer", ...extra });
@@ -769,14 +825,53 @@ export default function Workbench({ compile, onClose, onFinish, tourDone }) {
         <span style={{ fontFamily: MONO, fontWeight: 700, fontSize: 15 }}>🖥 Workbench</span>
         <span style={{ fontFamily: SANS, fontSize: 12, color: C.muted }} className="hidden md:inline">Dr. Wheat's four windows: header, implementation, driver + Makefile, shell</span>
         <span className="flex-1" />
-        <button className="cq-btn" onClick={() => setStep(0)} style={btn({ color: C.gold, border: `1px solid ${C.gold}` })}>{step < 0 ? "▶ Start the tour" : "↺ Restart tour"}</button>
+        <button className="cq-btn" onClick={() => { setExplain((e) => !e); if (!explain) { setStep(-1); setNoteIdx((i) => walk[i] ? i : 0); } }} style={btn({ color: explain ? C.ink : C.teal, background: explain ? C.teal : "transparent", border: `1px solid ${C.teal}`, fontWeight: 700 })} title="Line-by-line notes on every file">{explain ? "📖 Explaining" : "📖 Explain"}</button>
+        <button className="cq-btn" onClick={() => { setExplain(false); setStep(0); }} style={btn({ color: C.gold, border: `1px solid ${C.gold}` })}>{step < 0 ? "▶ Start the tour" : "↺ Restart tour"}</button>
         <button className="cq-btn" onClick={() => reset("his")} style={btn()} title="Reload Dr. Wheat's Bag files">His files</button>
         <button className="cq-btn" onClick={() => reset("blank")} style={btn({ color: C.teal, border: `1px solid ${C.teal}` })} title="Empty files with just the header comments: write the Bag from memory">Blank files</button>
         <button className="cq-btn" onClick={onClose} style={btn()} aria-label="Close workbench">✕ Close</button>
       </div>
 
+      {/* explain strip */}
+      {explain && (
+        <div className="px-4 py-2.5" style={{ background: C.panel2, borderBottom: `1px solid ${C.line}`, flexShrink: 0 }}>
+          {walk.length === 0 ? (
+            <Rich text="These notes are written for Dr. Wheat's files, and the files here have changed too much to match. Press **His files** to restore them." />
+          ) : (
+            <div className="flex items-start gap-3" style={{ flexDirection: wide ? "row" : "column" }}>
+              <div className="flex-1" style={{ minWidth: 0, width: wide ? undefined : "100%" }}>
+                {noteIdx === firstOfFile(note.file) && <div className="mb-2"><Rich text={FILE_INTRO[note.file]} size={13} color={C.muted} /></div>}
+                <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                  <span style={{ fontFamily: MONO, fontSize: 11, color: C.gold }}>{note.file}:{note.line}</span>
+                  <code style={{ fontFamily: MONO, fontSize: 12.5, background: C.ink, color: C.text, padding: "2px 8px", borderRadius: 4, whiteSpace: "pre", overflowX: "auto", maxWidth: "100%" }}>{note.code.trim()}</code>
+                </div>
+                <Rich text={note.text} />
+                {note.links.length > 0 && (
+                  <div className="flex items-center gap-2 mt-2 flex-wrap">
+                    <span style={{ fontFamily: MONO, fontSize: 11, color: C.teal }}>connects to</span>
+                    {note.links.map((l, i) => (
+                      <button key={i} className="cq-btn" onClick={() => showNote(walk.indexOf(l))} style={btn({ color: C.teal, border: `1px solid ${C.teal}44`, padding: "2px 8px", fontSize: 11.5 })}>{l.file}:{l.line} <span style={{ color: C.muted }}>{l.code.trim().slice(0, 34)}{l.code.trim().length > 34 ? "…" : ""}</span></button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="flex gap-2" style={{ flexShrink: 0, flexDirection: wide ? "column" : "row", alignItems: wide ? "flex-end" : "center", flexWrap: "wrap", width: wide ? undefined : "100%" }}>
+                <span style={{ fontFamily: MONO, fontSize: 11, color: C.muted }}>{noteIdx + 1} / {walk.length}</span>
+                <div className="flex gap-2">
+                  <button className="cq-btn" onClick={() => showNote(noteIdx - 1)} disabled={noteIdx === 0} style={btn({ opacity: noteIdx === 0 ? 0.4 : 1 })}>‹ Prev</button>
+                  <button className="cq-btn" onClick={() => showNote(noteIdx + 1)} disabled={noteIdx >= walk.length - 1} style={btn({ background: C.gold, color: C.ink, border: "none", fontWeight: 700, opacity: noteIdx >= walk.length - 1 ? 0.4 : 1 })}>Next ›</button>
+                </div>
+                <div className="flex gap-1 flex-wrap justify-end">
+                  {WALK_ORDER.map((f) => <button key={f} className="cq-btn" onClick={() => showNote(firstOfFile(f))} style={btn({ padding: "1px 7px", fontSize: 10.5, color: note.file === f ? C.gold : C.muted, border: `1px solid ${note.file === f ? C.gold : C.line}` })}>{f}</button>)}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* tour strip */}
-      {cur && (
+      {cur && !explain && (
         <div className="flex items-start gap-3 px-4 py-2.5" style={{ background: C.panel2, borderBottom: `1px solid ${C.line}`, flexShrink: 0 }}>
           <span style={{ fontFamily: MONO, fontSize: 11, color: C.gold, paddingTop: 3, whiteSpace: "nowrap" }}>Step {step + 1}/{TOUR.length}</span>
           <div className="flex-1" style={{ minWidth: 0 }}><Rich text={cur.text} /></div>
@@ -790,11 +885,11 @@ export default function Workbench({ compile, onClose, onFinish, tourDone }) {
 
       {/* the four windows */}
       {wide ? (
-        <div className="flex-1 p-3" style={{ minHeight: 0, display: "grid", gridTemplateColumns: "1fr 1.15fr 1fr", gridTemplateRows: "1fr 1fr", gap: 10 }}>
-          <div style={{ gridRow: "1 / 3", minHeight: 0, display: "flex" }}>{panes["bag.h"]}</div>
-          <div style={{ gridRow: "1 / 3", minHeight: 0, display: "flex" }}>{panes["bag.cpp"]}</div>
-          <div style={{ minHeight: 0, display: "flex" }}>{panes["bagMain.cpp"]}</div>
-          <div style={{ minHeight: 0, display: "flex" }}>{panes.shell}</div>
+        <div className="flex-1 p-3" style={{ minHeight: 0, display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(0,1.15fr) minmax(0,1fr)", gridTemplateRows: "1fr 1fr", gap: 10 }}>
+          <div style={{ gridRow: "1 / 3", minHeight: 0, minWidth: 0, display: "flex" }}>{panes["bag.h"]}</div>
+          <div style={{ gridRow: "1 / 3", minHeight: 0, minWidth: 0, display: "flex" }}>{panes["bag.cpp"]}</div>
+          <div style={{ minHeight: 0, minWidth: 0, display: "flex" }}>{panes["bagMain.cpp"]}</div>
+          <div style={{ minHeight: 0, minWidth: 0, display: "flex" }}>{panes.shell}</div>
         </div>
       ) : (
         <div className="flex-1 flex flex-col p-2" style={{ minHeight: 0 }}>

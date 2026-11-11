@@ -269,8 +269,8 @@ export default function CppQuest() {
 
   // Some lessons keep scaffolding (headers, class declaration, driver) out of the editor.
   // It is wrapped around the student's code at compile time, and error lines are mapped back.
-  const preludeLines = lesson.prelude ? lesson.prelude.split("\n").length : 0;
-  const fullCode = (lesson.prelude ? lesson.prelude + "\n" : "") + code + (lesson.postlude ? "\n" + lesson.postlude : "");
+  const preludeLines = lesson?.prelude ? lesson.prelude.split("\n").length : 0;
+  const fullCode = (lesson?.prelude ? lesson.prelude + "\n" : "") + code + (lesson?.postlude ? "\n" + lesson.postlude : "");
   const remapErr = (txt) => {
     if (!preludeLines) return txt;
     const n = code.split("\n").length;

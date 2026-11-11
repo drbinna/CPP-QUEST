@@ -51,6 +51,11 @@
    "title": "The AVL Tree"
   },
   {
+   "id": "c10b",
+   "blurb": "Struct, class, constructor, new/delete, arrays on the heap, destructor, references, const. One each, ten lines each.",
+   "title": "Before P1: eight small ideas"
+  },
+  {
    "id": "c11",
    "blurb": "Dr. Wheat's Program 1, one function per lesson, Parts A and B.",
    "title": "P1: the keyValue list"
@@ -1341,6 +1346,258 @@
    ],
    "starter": "#include <iostream>\nusing namespace std;\n\nstruct kvpair { int key; int value; };\nstruct tnode { kvpair p; unsigned int h; tnode *left; tnode *right; };\n\n// cppquest: sends a picture of the tree to the visualizer after each step (cerr only, never graded).\nvoid snapshot(tnode *t, bool top = true) {\n    if (top) cerr << \"@@T \";\n    if (t == nullptr) cerr << \"# \";\n    else { cerr << t->p.key << \" \"; snapshot(t->left, false); snapshot(t->right, false); }\n    if (top) cerr << endl;\n}\n\n// The base class, exactly as P4 leaves it for P5: the recursive helpers are virtual.\nclass grove {\nprotected:\n    tnode *root;\n    unsigned int nCount;\n    virtual bool insertHelper(kvpair p, tnode *&t);\n    virtual bool removeHelper(int key, tnode *&t);\n    kvpair findMin(tnode *t) const;\n    bool getValueHelper(int key, int &value, tnode *t) const;\n    void clearHelper(tnode *&t);\npublic:\n    grove() { root = nullptr; nCount = 0; }\n    virtual ~grove() { clearHelper(root); }\n    bool insert(kvpair p) { return insertHelper(p, root); }\n    bool remove(int key) { return removeHelper(key, root); }\n    bool getValue(int key, int &value) const { return getValueHelper(key, value, root); }\n    unsigned int count() const { return nCount; }\n    void clear() { clearHelper(root); nCount = 0; root = nullptr; }\n    tnode *rootNode() const { return root; }\n};\n\nbool grove::insertHelper(kvpair p, tnode *&t) {\n    bool r = false;\n    if (t) {\n        if (p.key < t->p.key)      r = insertHelper(p, t->left);\n        else if (p.key > t->p.key) r = insertHelper(p, t->right);\n    } else {\n        t = new tnode; t->p = p; t->h = 1; t->left = t->right = nullptr;\n        nCount++;\n        r = true;\n    }\n    return r;\n}\nkvpair grove::findMin(tnode *t) const { while (t->left) t = t->left; return t->p; }\nbool grove::removeHelper(int key, tnode *&t) {\n    if (t == nullptr) return false;\n    if (key < t->p.key) return removeHelper(key, t->left);\n    if (key > t->p.key) return removeHelper(key, t->right);\n    if (t->left && t->right) {\n        t->p = findMin(t->right);\n        return removeHelper(t->p.key, t->right);\n    }\n    tnode *dead = t;\n    t = t->left ? t->left : t->right;\n    delete dead;\n    nCount--;\n    return true;\n}\nbool grove::getValueHelper(int key, int &value, tnode *t) const {\n    if (t == nullptr) return false;\n    if (key < t->p.key) return getValueHelper(key, value, t->left);\n    if (key > t->p.key) return getValueHelper(key, value, t->right);\n    value = t->p.value;\n    return true;\n}\nvoid grove::clearHelper(tnode *&t) {\n    if (t == nullptr) return;\n    clearHelper(t->left); clearHelper(t->right);\n    delete t; t = nullptr;\n}\n\nint max(int a, int b) { return a > b ? a : b; }\n\nclass agrove : public grove {\nprotected:\n    unsigned int height(tnode *t) const { return t == nullptr ? 0 : t->h; }\n    unsigned int calcHeight(tnode *t) const { return t == nullptr ? 0 : 1 + max(height(t->left), height(t->right)); }\nprivate:\n    bool doBal;\n    void rotateRight(tnode *&t1);   // t1 is LEFT heavy: its left child takes its place\n    void rotateLeft(tnode *&t1);    // t1 is RIGHT heavy: its right child takes its place\n    void bal(tnode *&t);            // !doBal: just set height. doBal: fix a 2-heavy node with rotations\n    bool insertHelper(kvpair p, tnode *&t) override { bool r = grove::insertHelper(p, t); bal(t); return r; }\n    bool removeHelper(int key, tnode *&t) override { bool r = grove::removeHelper(key, t); bal(t); return r; }\n    void printIt(tnode *t, unsigned int &index) const;\npublic:\n    agrove(bool doBal) : grove() { this->doBal = doBal; }\n    using grove::insert;\n    using grove::remove;\n    void printIt() const { unsigned int index = 0; printIt(root, index); }\n};\n\nvoid agrove::printIt(tnode *t, unsigned int &index) const {\n    if (t == nullptr) return;\n    printIt(t->left, index);\n    cout << \"At \" << index << \" the value is (\" << t->p.key << \",\" << t->p.value << \"): height = \" << t->h << endl;\n    index++;\n    printIt(t->right, index);\n}\n\n// Write these three here:\nvoid agrove::rotateRight(tnode *&t1) {\n}\nvoid agrove::rotateLeft(tnode *&t1) {\n}\nvoid agrove::bal(tnode *&t) {\n    if (t == nullptr) return;\n    t->h = calcHeight(t);\n}\n\nint main() {\n    agrove G(true);\n    kvpair p;\n    int key, value, removeCount;\n    cout << \"Do Work #1 - START ********************\" << endl;\n    snapshot(G.rootNode());\n    while (cin >> p.key && cin >> p.value) {\n        if (!G.insert(p)) cout << \"Key not inserted:  \" << p.key << endl;\n        snapshot(G.rootNode());\n    }\n    cout << \"Tree count is \" << G.count() << endl;\n    cout << \"Tree contents are: \" << endl;\n    G.printIt();\n    removeCount = 0;\n    for (key = 25; key >= 0; key--)\n        if (G.remove(key)) { removeCount++; snapshot(G.rootNode()); }\n    cout << endl << \"Remove Count is \" << removeCount << endl;\n    cout << \"Tree count is \" << G.count() << endl;\n    cout << \"Tree contents are: \" << endl;\n    G.printIt();\n    cout << endl;\n    for (key = 0; key < 100; key += 2) {\n        value = -8888;\n        if (G.getValue(key, value)) {\n            cout << \"getValue for key \" << key;\n            cout << \" reports this value is in the tree: \" << value << endl;\n        }\n    }\n    G.clear();\n    snapshot(G.rootNode());\n    cout << endl << \"The cleared tree status:  count = \" << G.count() << endl;\n    cout << \"The cleared tree contents follow:\" << endl;\n    G.printIt();\n    cout << \"Do Work #1 - END   ********************\" << endl;\n    return 0;\n}\n",
    "challenge": "Write `rotateRight`, `rotateLeft`, and the balancing branches of `bal`. `rotateRight(t1)`: `t1` is left heavy \u2014 its left child `t2` takes its place: `t1->left = t2->right; t2->right = t1;` then fix `t1->h` and `t2->h` (in that order) and set `t1 = t2`. `rotateLeft` is the mirror. `bal(t)`: if `!doBal` just set the height; otherwise compare `height(t->left)` and `height(t->right)`: a difference of 2 means rotate \u2014 and if the heavy child leans the *other* way (a kink), rotate that child the opposite direction first. Main runs the professor's full P5 protocol; test 1 must match his `AVLcorrectOutput` exactly."
+  },
+  {
+   "id": "p0_1",
+   "xp": 40,
+   "boss": false,
+   "hints": [
+    "Reading into a part of a struct looks exactly like reading into a plain variable: `cin >> kv.key;`.",
+    "Two reads: `cin >> kv.key >> kv.value;`.",
+    "Nothing else in the file needs to change. The printing is already written."
+   ],
+   "tests": [
+    {
+     "input": "7 70",
+     "expected": "key 7 value 70\ncopy key 8 original key 7"
+    },
+    {
+     "input": "3 30",
+     "expected": "key 3 value 30\ncopy key 8 original key 3"
+    },
+    {
+     "input": "-1 0",
+     "expected": "key -1 value 0\ncopy key 8 original key -1"
+    }
+   ],
+   "title": "Idea 1: a struct is a box with compartments",
+   "chapter": "c10b",
+   "concept": [
+    "A struct is one variable with several named parts. `kv.key` is the part called key.",
+    "`copy = kv` copies every part. Changing the copy afterwards doesn't touch the original."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nstruct KEY_VALUE {\n    int key;\n    int value;\n};\n\nint main() {\n    KEY_VALUE kv;                 // one box with two compartments\n\n    // TODO: read a key and a value from the input into kv's two compartments\n\n    cout << \"key \" << kv.key << \" value \" << kv.value << endl;\n\n    KEY_VALUE copy = kv;          // copies BOTH compartments\n    copy.key = 8;                 // change the copy only\n    cout << \"copy key \" << copy.key << \" original key \" << kv.key << endl;\n\n    return 0;\n}\n",
+   "challenge": "Read two numbers from the input into `kv.key` and `kv.value`, so the program prints them back."
+  },
+  {
+   "id": "p0_2",
+   "xp": 40,
+   "boss": false,
+   "hints": [
+    "Inside `bump`, `count` is this counter's own number. One line: `count = count + 1;` (or `count++;`).",
+    "You don't write `c.count` inside the class. Inside the class, it's just `count`.",
+    "If you're tempted to write `c.count = c.count + 1` in `main`, try it and read the error: `count` is private."
+   ],
+   "tests": [
+    {
+     "input": "3",
+     "expected": "count 3"
+    },
+    {
+     "input": "0",
+     "expected": "count 0"
+    },
+    {
+     "input": "12",
+     "expected": "count 12"
+    }
+   ],
+   "title": "Idea 2: a class hides its number behind functions",
+   "chapter": "c10b",
+   "concept": [
+    "A class is a struct whose compartments are private: outside code can't touch them. The only way in is through the public functions.",
+    "Inside a member function, you use the member's name directly. `count` means this object's count."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nclass counter {\n    private:\n        int count;                // nobody outside may touch this\n\n    public:\n        counter();                // sets count to 0\n        int getCount();           // the only way to READ count\n        void bump();              // the only way to CHANGE count\n};\n\ncounter::counter() {\n    count = 0;\n}\n\nint counter::getCount() {\n    return count;\n}\n\nvoid counter::bump() {\n    // TODO: add one to count\n}\n\nint main() {\n    counter c;\n    int times;\n    cin >> times;\n\n    for (int i = 0; i < times; i++) {\n        c.bump();\n    }\n\n    // c.count = 99;              // try uncommenting this: the compiler refuses\n    cout << \"count \" << c.getCount() << endl;\n\n    return 0;\n}\n",
+   "challenge": "Write the body of `bump()` so it adds one to `count`. Then `main` can count to whatever number the input says."
+  },
+  {
+   "id": "p0_3",
+   "xp": 50,
+   "boss": false,
+   "hints": [
+    "The line is `this->bagCapacity = bagCapacity;`. Left side: the compartment. Right side: the number that was passed in.",
+    "`this` is a pointer to \"the object being built right now\", and `->` reaches into it. You'll only ever need it for this one situation.",
+    "The default `= 100` is already in the prototype. Don't write it again in the definition; the compiler refuses."
+   ],
+   "tests": [
+    {
+     "input": "10",
+     "expected": "capacity 10\ndefault 100"
+    },
+    {
+     "input": "1000",
+     "expected": "capacity 1000\ndefault 100"
+    },
+    {
+     "input": "0",
+     "expected": "capacity 0\ndefault 100"
+    }
+   ],
+   "title": "Idea 3: a constructor with a parameter, and this->",
+   "chapter": "c10b",
+   "concept": [
+    "A constructor can take parameters, so `bag b(10);` builds a bag of capacity 10.",
+    "When the parameter has the same name as the member, `this->bagCapacity` means the member and plain `bagCapacity` means the parameter."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nclass bag {\n    private:\n        unsigned int bagCapacity;\n\n    public:\n        bag(unsigned int bagCapacity = 100);  // the default lives HERE only\n        unsigned int getBagCapacity();\n};\n\nbag::bag(unsigned int bagCapacity) {\n    // TODO: store the parameter in the member of the same name\n}\n\nunsigned int bag::getBagCapacity() {\n    return bagCapacity;\n}\n\nint main() {\n    unsigned int n;\n    cin >> n;\n\n    bag b(n);                     // capacity from the input\n    bag d;                        // no number given: the default, 100\n\n    cout << \"capacity \" << b.getBagCapacity() << endl;\n    cout << \"default \" << d.getBagCapacity() << endl;\n\n    return 0;\n}\n",
+   "challenge": "Finish the constructor so the capacity passed in gets stored in the object. `bag b(n)` must report n; `bag d;` must report the default, 100."
+  },
+  {
+   "id": "p0_4",
+   "xp": 50,
+   "boss": false,
+   "hints": [
+    "`int *p = new int;` makes the pointer and the int in one line.",
+    "To put a number in the int, go through the pointer: `*p = n;`. To print it: `cout << *p`.",
+    "Last line before return: `delete p;`."
+   ],
+   "tests": [
+    {
+     "input": "42",
+     "expected": "the box at p holds 42\nnow it holds 43"
+    },
+    {
+     "input": "0",
+     "expected": "the box at p holds 0\nnow it holds 1"
+    },
+    {
+     "input": "-5",
+     "expected": "the box at p holds -5\nnow it holds -4"
+    }
+   ],
+   "title": "Idea 4: new asks for memory, delete gives it back",
+   "chapter": "c10b",
+   "concept": [
+    "A pointer holds an address, not a value. `*p` means \"the thing at that address\".",
+    "`new int` hands you the address of a fresh int. `delete p` gives it back. Every new needs a delete."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n\n    int *p;                       // a pointer: it will hold an ADDRESS\n\n    // TODO: p = new int;          ask for one int; p now holds where it is\n    // TODO: *p = n;               put n into the int AT that address\n\n    cout << \"the box at p holds \" << *p << endl;\n\n    *p = *p + 1;                  // change the int through the pointer\n    cout << \"now it holds \" << *p << endl;\n\n    // TODO: delete p;            give the int back\n\n    return 0;\n}\n",
+   "challenge": "Ask for one int on the heap, store the number from the input in it through the pointer, print it, and give the memory back."
+  },
+  {
+   "id": "p0_5",
+   "xp": 50,
+   "boss": false,
+   "hints": [
+    "`int *a = new int[n];` then `for (unsigned int i = 0; i < n; i++) a[i] = i * i;`.",
+    "Print with a loop too: `cout << a[i]`, and a space before every one except the first (`if (i > 0) cout << \" \";`).",
+    "Arrays from `new[]` are returned with `delete [] a;`, brackets included. `delete a` without brackets is a bug, even though it compiles."
+   ],
+   "tests": [
+    {
+     "input": "5",
+     "expected": "0 1 4 9 16"
+    },
+    {
+     "input": "1",
+     "expected": "0"
+    },
+    {
+     "input": "8",
+     "expected": "0 1 4 9 16 25 36 49"
+    }
+   ],
+   "title": "Idea 5: an array on the heap, and what p[i] means",
+   "chapter": "c10b",
+   "concept": [
+    "`new int[n]` reserves n ints in a row and gives you the address of the first one.",
+    "`a[i]` means \"the int i slots past the start\". The brackets work on a pointer exactly like on an array, because an array *is* an address."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nint main() {\n    unsigned int n;\n    cin >> n;\n\n    int *a;                       // will point at the FIRST of n ints\n\n    // TODO: a = new int[n];      reserve n ints in a row\n\n    // TODO: fill the row: slot i gets i * i\n\n    // TODO: print the slots on one line, separated by single spaces\n    cout << endl;\n\n    // TODO: delete [] a;         give the whole row back (brackets!)\n\n    return 0;\n}\n",
+   "challenge": "Ask for `n` ints with `new int[n]`, fill slot `i` with `i * i`, print them on one line separated by spaces, and give the array back with `delete []`."
+  },
+  {
+   "id": "p0_6",
+   "xp": 50,
+   "boss": false,
+   "hints": [
+    "Two lines: the `cout` and `delete [] data;`.",
+    "Compare the output with the code line by line. `a` dies at the `}` of the inner block, before \"a is gone\" prints. `b` dies at `delete b`.",
+    "If you don't write `delete [] data`, the program still passes the output test, but it leaks. In P1 he reads the code, not just the output."
+   ],
+   "tests": [
+    {
+     "input": "10",
+     "expected": "start\nconstructor: asking for 10 ints\na is alive\ndestructor: giving them back\na is gone\nconstructor: asking for 3 ints\nb is alive\ndestructor: giving them back\nend"
+    },
+    {
+     "input": "1",
+     "expected": "start\nconstructor: asking for 1 ints\na is alive\ndestructor: giving them back\na is gone\nconstructor: asking for 3 ints\nb is alive\ndestructor: giving them back\nend"
+    }
+   ],
+   "title": "Idea 6: the destructor runs by itself, at the end",
+   "chapter": "c10b",
+   "concept": [
+    "The destructor is the function with the squiggle, `~noisy()`. You never call it. It runs when the object dies: at the closing `}` of its block, or when you `delete` it.",
+    "Its job is to give back whatever the constructor took with `new`."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nclass noisy {\n    private:\n        int *data;\n\n    public:\n        noisy(unsigned int n);\n        ~noisy();                 // the destructor: same name, with a ~\n};\n\nnoisy::noisy(unsigned int n) {\n    cout << \"constructor: asking for \" << n << \" ints\" << endl;\n    data = new int[n];\n}\n\nnoisy::~noisy() {\n    // TODO: print \"destructor: giving them back\", then delete [] data\n}\n\nint main() {\n    unsigned int n;\n    cin >> n;\n\n    cout << \"start\" << endl;\n    {\n        noisy a(n);               // built here ...\n        cout << \"a is alive\" << endl;\n    }                             // ... and destroyed here, at the }\n    cout << \"a is gone\" << endl;\n\n    noisy *b = new noisy(3);      // built on the heap; lives until delete\n    cout << \"b is alive\" << endl;\n    delete b;                     // destroyed here\n    cout << \"end\" << endl;\n\n    return 0;\n}\n",
+   "challenge": "Write the destructor: print `destructor: giving them back` and `delete []` the array. Then read the output to see exactly when constructors and destructors run."
+  },
+  {
+   "id": "p0_7",
+   "xp": 50,
+   "boss": false,
+   "hints": [
+    "Change `void twice(int n)` to `void twice(int &n)`. Same body. Now `n` *is* the caller's `x`.",
+    "`takeOut` already has the `&`; inside, `got = 99;` writes into the caller's `g`. Then `return true;`.",
+    "This is how one function returns two things: the bool says \"did it work\", the reference carries the result."
+   ],
+   "tests": [
+    {
+     "input": "21",
+     "expected": "x after twice: 42\ntakeOut worked, got 99"
+    },
+    {
+     "input": "0",
+     "expected": "x after twice: 0\ntakeOut worked, got 99"
+    },
+    {
+     "input": "-4",
+     "expected": "x after twice: -8\ntakeOut worked, got 99"
+    }
+   ],
+   "title": "Idea 7: a reference parameter changes the caller's variable",
+   "chapter": "c10b",
+   "concept": [
+    "Normally a function gets a *copy* of what you pass. Change the copy, the original doesn't notice.",
+    "Put `&` after the type in the parameter list and the function gets the *original* under a new name. Change it there, the caller sees it."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nvoid twice(int n) {           // TODO: make n a reference: int &n\n    n = n * 2;\n}\n\nbool takeOut(int &got) {\n    // TODO: put 99 into got, then return true\n    return false;\n}\n\nint main() {\n    int x;\n    cin >> x;\n\n    twice(x);\n    cout << \"x after twice: \" << x << endl;\n\n    int g = 0;\n    if (takeOut(g)) {\n        cout << \"takeOut worked, got \" << g << endl;\n    } else {\n        cout << \"takeOut failed, g still \" << g << endl;\n    }\n\n    return 0;\n}\n",
+   "challenge": "Add the `&` to `twice`'s parameter so it doubles the caller's variable, and write `takeOut` so it puts 99 into the caller's variable and returns true."
+  },
+  {
+   "id": "p0_8",
+   "xp": 50,
+   "boss": false,
+   "hints": [
+    "Change `int box::get() {` to `int box::get() const {`.",
+    "Try putting `n = 0;` inside `get` after that, and read the error: a const function can't assign to a member. Then take it out.",
+    "`const box frozen(5);` in main is a box nobody may change. Only `const` functions can be called on it, which is why `get` needs the word and `set` doesn't have it."
+   ],
+   "tests": [
+    {
+     "input": "5",
+     "expected": "b holds 6\nfrozen holds 5"
+    },
+    {
+     "input": "0",
+     "expected": "b holds 1\nfrozen holds 0"
+    },
+    {
+     "input": "-3",
+     "expected": "b holds -2\nfrozen holds -3"
+    }
+   ],
+   "title": "Idea 8: const is a promise not to change the object",
+   "chapter": "c10b",
+   "concept": [
+    "`const` after a member function's parameter list means: this function only looks at the object, it never changes it. The compiler checks that promise.",
+    "The word has to appear in both the prototype and the definition, or the compiler thinks they're two different functions."
+   ],
+   "starter": "#include <iostream>\nusing namespace std;\n\nclass box {\n    private:\n        int n;\n\n    public:\n        box(int n);\n        int get() const;          // promise: get() never changes the box\n        void set(int n);          // no promise: set() changes it\n};\n\nbox::box(int n) {\n    this->n = n;\n}\n\nint box::get() {                  // TODO: the promise is missing here\n    return n;\n}\n\nvoid box::set(int n) {\n    this->n = n;\n}\n\nint main() {\n    int v;\n    cin >> v;\n\n    box b(v);\n    b.set(v + 1);\n    cout << \"b holds \" << b.get() << endl;\n\n    const box frozen(v);          // a box nobody may change\n    // frozen.set(0);             // try uncommenting: refused, set() isn't const\n    cout << \"frozen holds \" << frozen.get() << endl;\n\n    return 0;\n}\n",
+   "challenge": "The getter is declared `const` in the class but its definition forgot the word, so the program doesn't compile. Add `const` to the definition. Then read what `main` does with a `const box`."
   },
   {
    "id": "p1_1",

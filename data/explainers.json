@@ -73,55 +73,6 @@
   ]
  },
  {
-  "lesson_id": "l43",
-  "blocks": [
-   {
-    "t": "p",
-    "x": "Here is the one idea in this lesson: **before you can balance a tree, you have to be able to measure it.** Every node gets a number, `h`, that says how tall the tree under it is. That's all we build today. No rotations yet \u2014 just the measuring tape."
-   },
-   {
-    "t": "p",
-    "x": "The counting rule, straight from the professor's output: **a leaf is height 1. An empty tree is height 0.** A node's height is 1 plus the taller of its two children. So a root with a leaf on each side is height 2. A stick of 7 nodes is height 7."
-   },
-   {
-    "t": "code",
-    "x": "unsigned int agrove::height(tnode *t) const {\n    return t == nullptr ? 0 : t->h;     // empty: 0. real: whatever it recorded\n}\nunsigned int agrove::calcHeight(tnode *t) const {\n    if (t == nullptr) return 0;\n    return 1 + max(height(t->left), height(t->right));   // me + my taller child\n}"
-   },
-   {
-    "t": "p",
-    "x": "Two functions that look alike but aren't. `height` just *reads* the number a node already wrote down. `calcHeight` *works it out* from the children. You read when you're asking; you calculate when something changed. (`max` is the tiny non-member function P5 asks you to write yourself.)"
-   },
-   {
-    "t": "p",
-    "x": "Once every node knows its height, one subtraction tells you whether it's leaning: **balance = height(left) \u2212 height(right).** Positive means left heavy, negative means right heavy, zero means even. This lesson only measures; next lesson, a balance of \u00b12 is the signal to rotate. Try it on your output: on the professor's input without balancing, the root is 10 with a left subtree of height 1 (just the 5) and a right subtree of height 6 \u2014 balance \u22125, badly right heavy. That one number is the whole reason the next lesson exists."
-   },
-   {
-    "t": "p",
-    "x": "Now, when does a height change? Only when something is inserted or removed below a node. And here's the beautiful part you set up in the last lesson: the base class's insert is *recursive*, and its helper is `virtual`. So when `grove::insertHelper` recurses, each of those calls goes to **your** override \u2014 which calls the base, then `bal(t)`:"
-   },
-   {
-    "t": "code",
-    "x": "bool agrove::insertHelper(kvpair p, tnode *&t) {\n    bool r = grove::insertHelper(p, t);   // the base walks down and hooks the node\n    bal(t);                               // then, on the way back up: measure me\n    return r;\n}\nvoid agrove::bal(tnode *&t) {\n    if (t == nullptr) return;\n    t->h = calcHeight(t);                 // this lesson: just record the height\n}"
-   },
-   {
-    "t": "p",
-    "x": "Read what that does on the class chain 100, 200, 150. Insert 150: the recursion walks 100 \u2192 200 \u2192 (empty) and hooks 150 there. Then the calls *unwind*: `bal(150)` records 1. `bal(200)` records 2. `bal(100)` records 3. Every node on the path got re-measured, bottom to top, and you never wrote a loop. **That is what \u201cwhile returning to the insert\u201d buys you.**"
-   },
-   {
-    "t": "p",
-    "x": "The `doBal` flag in the real P5 is a switch: off, `bal` only records heights (this lesson); on, it also fixes imbalance (next lesson). The professor makes you run both \u2014 `./AVL 0` and `./AVL 1` on the same input \u2014 and the spec literally says *\u201cwait for it to finish; it will be a while\u201d* about the unbalanced one. Next lesson you'll see why."
-   },
-   {
-    "t": "p",
-    "x": "The print format is P5's exact one: `At i the value is (k,v): height = h`, in order, with a running index passed by reference. Watch the heights in your output: on the real BSTinput sequence, without balancing the root reads height 7. With balancing it will read 5 \u2014 and on a million random keys, the gap is the difference between a tree that answers in microseconds and one that doesn't."
-   },
-   {
-    "t": "p",
-    "x": "Try it in the Tree Lab: insert `1 2 3 4 5 6 7` as pairs and watch the stick grow. Mission: root height 4 or more. Then remember that shape \u2014 next lesson the same input produces height 3, and you'll watch the nodes swing into place."
-   }
-  ]
- },
- {
   "lesson_id": "p1_1",
   "blocks": [
    {
@@ -130,7 +81,7 @@
    },
    {
     "t": "p",
-    "x": "The real assignment is three files: `common.h` (his, unchanged), `list.h` (the class), `list.cpp` (the functions), plus his `listMain.cpp` driver. The editor here holds all of them in one window with banners between the sections, so you can see the whole thing at once. The Workbench shows the same code split into windows the way he works."
+    "x": "The real assignment is three files: `common.h` (his, unchanged), `list.h` (the class), `list.cpp` (the functions), plus his `listMain.cpp` driver. The editor on the right shows only the `list.cpp` side, the part you write. The other three are wrapped around your code when you press Run; every line of them is explained at the bottom of this page, and the Workbench shows the same code split into windows the way he works."
    },
    {
     "t": "p",
@@ -178,361 +129,107 @@
    {
     "t": "p",
     "x": "The driver in this lesson reads commands from the test input: `new 10 2` builds a list with capacity 10 and expand 2, `count` prints the count and capacity, `setexpand 7` changes the expand size. The first test sends no commands at all, so it exercises the defaults."
+   },
+   {
+    "t": "p",
+    "x": "**What's around your code.**"
+   },
+   {
+    "t": "p",
+    "x": "The editor shows only the part you write: the `list.cpp` section. The rest of the program is real and gets wrapped around your code when you press Run, but it's his, not yours, so it stays out of the way. Here is all of it, piece by piece, so nothing in there is a mystery."
+   },
+   {
+    "t": "code",
+    "x": "#include <iostream>\n#include <string>\n\nusing namespace std;"
+   },
+   {
+    "t": "p",
+    "x": "`#include <iostream>` brings in `cout` (printing) and `cin` (reading). `#include <string>` brings in the `string` type the driver uses for command words. `using namespace std;` means you can write `cout` instead of `std::cout` everywhere below."
+   },
+   {
+    "t": "code",
+    "x": "struct KEY_VALUE {\n    int key;\n    int value;\n};\n\nconst unsigned int NEG_RESULT = 0xFFFFFFFF;"
+   },
+   {
+    "t": "p",
+    "x": "This is `common.h`. A **struct** is a box with named compartments. `KEY_VALUE` has two: `key` and `value`, both integers. When you write `KEY_VALUE kv;` you get one box; `kv.key = 5;` puts 5 in the first compartment. Boxes copy whole: `a = b;` copies both compartments. `NEG_RESULT` is a named constant (`const` means it can't change) equal to the biggest `unsigned int` there is. `getIndex` will return it to say \"no such key\"."
+   },
+   {
+    "t": "code",
+    "x": "class list {\n    private:\n        KEY_VALUE *keyValues;\n        unsigned int listCapacity;\n        unsigned int originalListCapacity;\n        unsigned int listCount;\n        unsigned int expandSize;\n        unsigned int originalExpandSize;\n        bool shortenEnabled;"
+   },
+   {
+    "t": "p",
+    "x": "This is the top of `list.h`. `class list {` starts the blueprint; `private:` says the seven things that follow are the list's own business and nothing outside can read or change them directly. `KEY_VALUE *keyValues` is a **pointer**: not the boxes themselves, but the address of where a row of boxes will be once the constructor asks for them with `new`. The five `unsigned int`s are counters (`unsigned` because none can be negative). `bool shortenEnabled` is a yes/no switch for Part B."
+   },
+   {
+    "t": "code",
+    "x": "    public:\n        list(unsigned int listCapacity = 100, unsigned int expandSize = 5);\n        ~list();\n        unsigned int getCount() const;\n        unsigned int getCapacity() const;\n        unsigned int getExpandSize() const;\n        void setExpandSize(unsigned int expandSize);\n};"
+   },
+   {
+    "t": "p",
+    "x": "`public:` starts the part anyone may use. These are **prototypes**: the name, what goes in, what comes out, and no body. `list(...)` with the class's own name is the constructor; the `= 100` and `= 5` are what you get if you don't say. `~list()` with the squiggle is the destructor. `const` at the end of a prototype is a promise that the function only looks. The `};` closes the class; the semicolon is required. This section grows by a few lines each lesson as new functions appear, and each lesson lists what's new."
+   },
+   {
+    "t": "code",
+    "x": "int main() {\n    list *L = new list();\n    string cmd;\n\n    while (cin >> cmd) {\n        if (cmd == \"new\") {\n            unsigned int cap, exp;\n            cin >> cap >> exp;\n            delete L;\n            L = new list(cap, exp);\n            cout << \"new list: capacity \" << L->getCapacity() << \" ...\" << endl;\n        }\n        else if (cmd == \"count\") { ... }\n        else if (cmd == \"setexpand\") { ... }\n        else cout << \"unknown command \" << cmd << endl;\n    }\n\n    delete L;\n    return 0;\n}"
+   },
+   {
+    "t": "p",
+    "x": "This is `listMain.cpp`, the **driver**, and it's the part that runs. Read it like a story. `int main()` is where every C++ program starts. `list *L = new list();` builds one list on the heap with the defaults and keeps its address in `L`. `string cmd;` is a word-sized box. `while (cin >> cmd)` reads one word at a time from the test input and stops when the input runs out. Each `if (cmd == \"...\")` is one command the driver understands; it reads any numbers that come after the word, calls one of *your* functions through `L->`, and prints something so the test can check it. `delete L;` at the end runs your destructor. `return 0;` tells the operating system all went well."
+   },
+   {
+    "t": "p",
+    "x": "The arrow in `L->getCount()` is how you call a function on an object you hold by pointer. If `L` were the object itself you'd write `L.getCount()`; since it's an address, `->` first follows the address, then calls."
    }
   ]
  },
  {
-  "lesson_id": "p1_2",
+  "lesson_id": "l43",
   "blocks": [
    {
     "t": "p",
-    "x": "Now the list can hold something. **`add(kv)`** appends: the first free slot is `keyValues[listCount]` (slots 0 to count\u22121 are in use), so store there and bump the count. Post-increment does both in one expression:"
+    "x": "Here is the one idea in this lesson: **before you can balance a tree, you have to be able to measure it.** Every node gets a number, `h`, that says how tall the tree under it is. That's all we build today. No rotations yet \u2014 just the measuring tape."
+   },
+   {
+    "t": "p",
+    "x": "The counting rule, straight from the professor's output: **a leaf is height 1. An empty tree is height 0.** A node's height is 1 plus the taller of its two children. So a root with a leaf on each side is height 2. A stick of 7 nodes is height 7."
    },
    {
     "t": "code",
-    "x": "keyValues[listCount++] = kv;    // use the OLD count as the index, then add one"
+    "x": "unsigned int agrove::height(tnode *t) const {\n    return t == nullptr ? 0 : t->h;     // empty: 0. real: whatever it recorded\n}\nunsigned int agrove::calcHeight(tnode *t) const {\n    if (t == nullptr) return 0;\n    return 1 + max(height(t->left), height(t->right));   // me + my taller child\n}"
    },
    {
     "t": "p",
-    "x": "The spec says: if the list is full, call `expand()` first, and if that fails, `add` returns false. `expand()` is next lesson; this lesson's starter has it as a stub returning false, so a full list simply refuses. The pattern is the return-code shape again: decide `rc`, act if `rc`, return `rc`."
+    "x": "Two functions that look alike but aren't. `height` just *reads* the number a node already wrote down. `calcHeight` *works it out* from the children. You read when you're asking; you calculate when something changed. (`max` is the tiny non-member function P5 asks you to write yourself.)"
    },
    {
     "t": "p",
-    "x": "**`printIt(limit)`** prints one line per entry, `index key`. The wrinkle is `limit`: negative or bigger than the count means the whole list. So compute how many to print first, then loop:"
+    "x": "Once every node knows its height, one subtraction tells you whether it's leaning: **balance = height(left) \u2212 height(right).** Positive means left heavy, negative means right heavy, zero means even. This lesson only measures; next lesson, a balance of \u00b12 is the signal to rotate. Try it on your output: on the professor's input without balancing, the root is 10 with a left subtree of height 1 (just the 5) and a right subtree of height 6 \u2014 balance \u22125, badly right heavy. That one number is the whole reason the next lesson exists."
+   },
+   {
+    "t": "p",
+    "x": "Now, when does a height change? Only when something is inserted or removed below a node. And here's the beautiful part you set up in the last lesson: the base class's insert is *recursive*, and its helper is `virtual`. So when `grove::insertHelper` recurses, each of those calls goes to **your** override \u2014 which calls the base, then `bal(t)`:"
    },
    {
     "t": "code",
-    "x": "unsigned int n = listCount;\nif (limit >= 0 && (unsigned int) limit < listCount) {\n    n = limit;\n}\nfor (unsigned int i = 0; i < n; i++) {\n    cout << i << \" \" << keyValues[i].key << endl;\n}"
+    "x": "bool agrove::insertHelper(kvpair p, tnode *&t) {\n    bool r = grove::insertHelper(p, t);   // the base walks down and hooks the node\n    bal(t);                               // then, on the way back up: measure me\n    return r;\n}\nvoid agrove::bal(tnode *&t) {\n    if (t == nullptr) return;\n    t->h = calcHeight(t);                 // this lesson: just record the height\n}"
    },
    {
     "t": "p",
-    "x": "The cast `(unsigned int) limit` matters: `limit` is a signed `int` (it has to be, to allow \u22121) and `listCount` is unsigned. Comparing them directly earns a warning under his flags, and the assignment requires a warning-free build. Check the sign first, then cast."
+    "x": "Read what that does on the class chain 100, 200, 150. Insert 150: the recursion walks 100 \u2192 200 \u2192 (empty) and hooks 150 there. Then the calls *unwind*: `bal(150)` records 1. `bal(200)` records 2. `bal(100)` records 3. Every node on the path got re-measured, bottom to top, and you never wrote a loop. **That is what \u201cwhile returning to the insert\u201d buys you.**"
    },
    {
     "t": "p",
-    "x": "Why `const` on `printIt`? It reads the list and prints; it changes nothing. If you forget it here, you can't call `printIt` on a `const list` later, and the compiler will refuse to match the prototype."
+    "x": "The `doBal` flag in the real P5 is a switch: off, `bal` only records heights (this lesson); on, it also fixes imbalance (next lesson). The professor makes you run both \u2014 `./AVL 0` and `./AVL 1` on the same input \u2014 and the spec literally says *\u201cwait for it to finish; it will be a while\u201d* about the unbalanced one. Next lesson you'll see why."
    },
    {
     "t": "p",
-    "x": "The second test builds a list of capacity 3 with expand size 0, adds four, and expects the fourth to print `add 4 FAILED`. That's the full-list path, and it's how he'll test you too."
-   }
-  ]
- },
- {
-  "lesson_id": "p1_3",
-  "blocks": [
-   {
-    "t": "p",
-    "x": "Arrays in C++ can't grow. `new KEY_VALUE[10]` is ten slots forever. So \"growing\" means **making a bigger array and moving house**, and `expand()` is that move, done in a strict order:"
-   },
-   {
-    "t": "code",
-    "x": "KEY_VALUE *bigger = new KEY_VALUE[listCapacity + expandSize];   // 1. new, bigger home\n\nfor (unsigned int i = 0; i < listCount; i++) {\n    bigger[i] = keyValues[i];                                   // 2. carry the furniture over\n}\n\nif (keyValues != NULL) {\n    delete [] keyValues;                                        // 3. give up the old home\n}\n\nkeyValues = bigger;                                             // 4. remember the new address\nlistCapacity += expandSize;"
+    "x": "The print format is P5's exact one: `At i the value is (k,v): height = h`, in order, with a running index passed by reference. Watch the heights in your output: on the real BSTinput sequence, without balancing the root reads height 7. With balancing it will read 5 \u2014 and on a million random keys, the gap is the difference between a tree that answers in microseconds and one that doesn't."
    },
    {
     "t": "p",
-    "x": "Get the order wrong and things break in two different ways. Delete before you copy and step 2 reads from memory you no longer own: it may *seem* to work, which is worse. Skip the delete and every expand leaks one array; the program runs, and slowly eats memory. That second one is the bug the destructor lesson warned about, happening in the middle of the program's life."
-   },
-   {
-    "t": "p",
-    "x": "Two details from the spec. `expand()` returns false when `expandSize` is 0, because growing by nothing isn't growing. And a list built with capacity 0 has `keyValues == NULL`, so the delete must be guarded, but the rest works: a NULL array with zero entries copies nothing and becomes a real array of `expandSize` slots."
-   },
-   {
-    "t": "p",
-    "x": "Once `expand()` works, `add` from last lesson starts succeeding on a full list without any change to `add` itself. That's the point of writing the pieces in this order: each one is small, and the earlier ones get better for free."
-   },
-   {
-    "t": "p",
-    "x": "Draw this one. Two boxes for the old and new arrays, the pointer moving from one to the other. The exam's \"design a storage structure\" question for a growable list is exactly this picture."
-   }
-  ]
- },
- {
-  "lesson_id": "p1_4",
-  "blocks": [
-   {
-    "t": "p",
-    "x": "`add` put things at the back, where there was already space. **`insert`** puts things at the *front*, where there isn't. Making room means moving every entry one slot to the right, and the direction you do that in is the whole lesson."
-   },
-   {
-    "t": "p",
-    "x": "Suppose the list holds `[A, B, C]` and you want `X` at the front. Copy from the back:"
-   },
-   {
-    "t": "code",
-    "x": "[A, B, C, _]   copy C into slot 3   ->  [A, B, C, C]\n               copy B into slot 2   ->  [A, B, B, C]\n               copy A into slot 1   ->  [A, A, B, C]\n               put X in slot 0      ->  [X, A, B, C]"
-   },
-   {
-    "t": "p",
-    "x": "Now try it from the front: copy A into slot 1 and you've destroyed B. Copy slot 1 (now A) into slot 2 and you've destroyed C. You end with `[X, A, A, A]`. The loop that works runs *down*:"
-   },
-   {
-    "t": "code",
-    "x": "for (unsigned int i = listCount; i > 0; i--) {\n    keyValues[i] = keyValues[i - 1];\n}\nkeyValues[0] = kv;\nlistCount++;"
-   },
-   {
-    "t": "p",
-    "x": "Watch the loop condition. `i` is unsigned, so `i >= 0` is always true and the loop never ends (it wraps around to 4 billion and crashes). `i > 0` with `i - 1` inside is the safe shape, and you'll use it again in `deleteFirst` and `insertAt`."
-   },
-   {
-    "t": "p",
-    "x": "This shifting is why `insert` costs O(n) while `add` costs O(1): every entry moves. Write that in a comment above the function. In P2, the linked list exists specifically to make insert-at-front O(1) again, and you'll appreciate it more for having written this."
-   }
-  ]
- },
- {
-  "lesson_id": "p1_5",
-  "blocks": [
-   {
-    "t": "p",
-    "x": "Two new ideas here, one in the signature and one in the body."
-   },
-   {
-    "t": "p",
-    "x": "**The signature.** `bool deleteFirst(KEY_VALUE &kv)` returns a `bool` *and* the deleted entry. The `&` makes `kv` a **reference**: inside the function, `kv` *is* the caller's variable, not a copy. Assign to it and the caller sees the change:"
-   },
-   {
-    "t": "code",
-    "x": "// in the driver\nKEY_VALUE got;\nif (L->deleteFirst(got)) {          // got is filled in by the function\n    cout << got.key << endl;\n}\n\n// in the function\nkv = keyValues[0];                  // writes straight into the caller's `got`"
-   },
-   {
-    "t": "p",
-    "x": "Without the `&`, `kv` would be a copy, the assignment would change the copy, and the caller would see nothing. This is the same trick `cin >> x` uses, and you'll use it in `readAt`, `deleteAt`, and all through P2. The spec adds a rule: if the list is empty, return false and leave `kv` exactly as it was."
-   },
-   {
-    "t": "p",
-    "x": "**The body.** `deleteFirst` is `insert` in reverse: entry 0 goes out through `kv`, and everything moves one slot *left*. Now you start from the **front**:"
-   },
-   {
-    "t": "code",
-    "x": "kv = keyValues[0];\nfor (unsigned int i = 1; i < listCount; i++) {\n    keyValues[i - 1] = keyValues[i];    // 1 -> 0, 2 -> 1, 3 -> 2 ...\n}\nlistCount--;"
-   },
-   {
-    "t": "p",
-    "x": "Starting from the back here would overwrite slot `count-2` with slot `count-1` before you'd saved it. Insert shifts right from the back; delete shifts left from the front. Draw both once and you won't mix them up."
-   },
-   {
-    "t": "p",
-    "x": "**`deleteLast`** has no shifting at all. The last used slot is `listCount - 1`; copy it out and drop the count. `kv = keyValues[--listCount];` does both, with the pre-decrement so the index is right. The spec says *do not shorten the list*: the capacity stays, the slot just stops counting, like the Bag's `clear`."
-   },
-   {
-    "t": "p",
-    "x": "Note the cost difference: `deleteFirst` is O(n), `deleteLast` is O(1). Same list, two ends, very different prices. A queue built on this array would be expensive on one end, and P2's linked list fixes exactly that."
-   }
-  ]
- },
- {
-  "lesson_id": "p1_6",
-  "blocks": [
-   {
-    "t": "p",
-    "x": "These two are the **read-only** half of the interface: they look at the list and change nothing, so both carry `const`. They're short, but each shows a pattern he'll ask about."
-   },
-   {
-    "t": "p",
-    "x": "**`readAt(index, kv)`** answers \"what's at position i?\" without exposing the array. The caller passes a `KEY_VALUE` by reference, the function fills it in if the index is valid. And \"valid\" is one comparison:"
-   },
-   {
-    "t": "code",
-    "x": "bool rc = (index < listCount);   // unsigned: negative values are already impossible\nif (rc) {\n    kv = keyValues[index];\n}\nreturn rc;"
-   },
-   {
-    "t": "p",
-    "x": "Why no `index >= 0` check? Because `index` is `unsigned int`; there is no negative to check for. That's one of the reasons he insists on `unsigned` for indexes and counts: the type does half the validation."
-   },
-   {
-    "t": "p",
-    "x": "**`getIndex(key)`** searches. It's `isPresent` from the Bag, except it returns *where* instead of *whether*. The problem is the return type: an `unsigned int` can't be \u22121 to mean \"not found\". So `common.h` defines `NEG_RESULT` as `0xFFFFFFFF`, the largest unsigned value, which no real list could ever reach:"
-   },
-   {
-    "t": "code",
-    "x": "unsigned int rc = NEG_RESULT;           // assume not found\nfor (unsigned int i = 0; i < listCount; i++) {\n    if (keyValues[i].key == key) {\n        rc = i;\n        break;                          // first match wins\n    }\n}\nreturn rc;"
-   },
-   {
-    "t": "p",
-    "x": "The caller compares against `NEG_RESULT`, never against \u22121. (Fun fact: `(unsigned int) -1` *is* `0xFFFFFFFF`, which is why the name has NEG in it. Don't rely on that in your code; use the constant.)"
-   },
-   {
-    "t": "p",
-    "x": "The third test has two entries with key 7. `getIndex` must return the *first* one, index 0, which is what the `break` guarantees."
-   }
-  ]
- },
- {
-  "lesson_id": "p1_7",
-  "blocks": [
-   {
-    "t": "p",
-    "x": "**`clear()`** is where the two `original` members earn their keep. After a few expands the list might have capacity 50; `clear()` has to put it back to the capacity it was *built* with, as if it were new. So it's not just `listCount = 0` like the Bag; it's a rebuild:"
-   },
-   {
-    "t": "code",
-    "x": "listCount = 0;\nlistCapacity = originalListCapacity;\nexpandSize = originalExpandSize;\n\nif (keyValues != NULL) {\n    delete [] keyValues;              // the destructor's job ...\n}\n\nif (listCapacity > 0) {\n    keyValues = new KEY_VALUE[listCapacity];   // ... then the constructor's\n} else {\n    keyValues = NULL;\n}"
-   },
-   {
-    "t": "p",
-    "x": "Read that as *destructor, then constructor*. It's the same two pieces of code you already wrote, in sequence. The spec also says `shortenEnabled` keeps its value, so don't reset it."
-   },
-   {
-    "t": "p",
-    "x": "With `clear()` done, **Part A is complete**: constructor, destructor, `expand`, `insert`, `add`, `deleteFirst`, `deleteLast`, `setExpandSize`, `getExpandSize`, `clear`, `readAt`, `getIndex`, `printIt`, `getCount`, `getCapacity`. Scroll through the whole file once and notice how much of it is the same three shapes: the return-code pattern, the shift loop in one direction or the other, and allocate-copy-delete-repoint."
-   },
-   {
-    "t": "p",
-    "x": "Before moving on, do what he'll make you do: write the **cost** of each function as a comment above it. `add` and `deleteLast` are O(1); `insert`, `deleteFirst` and `getIndex` are O(n); `expand` is O(n) but happens only once per `expandSize` adds. That table is an exam question."
-   }
-  ]
- },
- {
-  "lesson_id": "p1_8",
-  "blocks": [
-   {
-    "t": "p",
-    "x": "Everything you've written in this chapter, from a blank implementation, with the driver throwing every command at it. No new concepts; this is the **cold re-implementation** your study plan schedules for the week after you first build something."
-   },
-   {
-    "t": "p",
-    "x": "Why do it this way? Because the integrity policy means the real P1 is written alone, and the exam asks you to write these algorithms by hand. Being able to *follow* the earlier lessons is not the same as being able to *produce* them. This lesson measures the second thing."
-   },
-   {
-    "t": "p",
-    "x": "Time yourself. Under an hour for all of Part A means you know it. Over two means do lessons 1\u20137 once more next week and come back."
-   },
-   {
-    "t": "p",
-    "x": "When it passes, open the Workbench, press **Blank files**, and write the same class split into `list.h` and `list.cpp` with your own Makefile. That's the form he'll grade."
-   }
-  ]
- },
- {
-  "lesson_id": "p1_9",
-  "blocks": [
-   {
-    "t": "p",
-    "x": "Part B starts here. Everything highlighted on the assignment sheet, in roughly the order you'd write it."
-   },
-   {
-    "t": "p",
-    "x": "**`insertAt`** is `insert` with a dial on it. `insert` always opens slot 0; `insertAt` opens slot `index`. Same loop, same direction (right, from the back), different stopping point:"
-   },
-   {
-    "t": "code",
-    "x": "for (unsigned int i = listCount; i > index; i--) {\n    keyValues[i] = keyValues[i - 1];\n}\nkeyValues[index] = kv;\nlistCount++;"
-   },
-   {
-    "t": "p",
-    "x": "With `index = 0` this is exactly `insert`. With `index = listCount` the loop runs zero times and this is exactly `add`. One function, both behaviours; he could have written the other two in terms of this one."
-   },
-   {
-    "t": "p",
-    "x": "The validity rule is a little different from `readAt`: `index <= listCount`, with the equals. An index one past the end is fine (it means append); two past would leave an uninitialised gap, so the spec says refuse and *change nothing*, which includes not expanding. Check the index before you expand."
-   },
-   {
-    "t": "p",
-    "x": "The third test starts with an empty list and does `insertat 0`, which must work (0 \u2264 0). Then `insertat 1` on a one-entry list, which appends. Keep the \u2264."
-   }
-  ]
- },
- {
-  "lesson_id": "p1_10",
-  "blocks": [
-   {
-    "t": "p",
-    "x": "**`insertByKey`** keeps the list in key order, one insertion at a time. Find where the new key belongs, then let `insertAt` do the shifting. Two steps, and the second one is already written:"
-   },
-   {
-    "t": "code",
-    "x": "unsigned int index = listCount;             // if nothing is bigger, go at the end\nfor (unsigned int i = 0; i < listCount; i++) {\n    if (keyValues[i].key > kv.key) {\n        index = i;                          // first entry bigger than ours\n        break;\n    }\n}\nreturn insertAt(index, kv);"
-   },
-   {
-    "t": "p",
-    "x": "That's it. Returning `insertAt`'s result directly is what the spec asks for and saves you a variable."
-   },
-   {
-    "t": "p",
-    "x": "Notice the strict `>`. A key equal to one already present isn't \"greater\", so the search keeps going and the duplicate lands *after* the existing copies. That's the stable choice, and the test with two 20s checks it."
-   },
-   {
-    "t": "p",
-    "x": "You've met this before: it's the inner loop of insertion sort, finding the slot for the next card and shifting the bigger ones right. A list that only ever receives entries through `insertByKey` is always sorted, which is why `getIndex` could be made faster with binary search. Not required here, but a good question to be able to answer."
-   },
-   {
-    "t": "p",
-    "x": "The last test mixes `add` (unsorted) with `insertByKey`. The function doesn't sort the list; it only places the new entry before the first bigger key it meets. With `[50, 10]` and a new 20, it stops at 50 and the result is `[20, 50, 10]`. That's correct per spec and a nice reminder that `insertByKey` assumes the list was sorted to begin with."
-   }
-  ]
- },
- {
-  "lesson_id": "p1_11",
-  "blocks": [
-   {
-    "t": "p",
-    "x": "Three small functions and one with a trap."
-   },
-   {
-    "t": "p",
-    "x": "**`deleteAt`** is to `deleteFirst` what `insertAt` was to `insert`: the same left shift, starting one past the deleted slot instead of at 1."
-   },
-   {
-    "t": "code",
-    "x": "kv = keyValues[index];\nfor (unsigned int i = index + 1; i < listCount; i++) {\n    keyValues[i - 1] = keyValues[i];\n}\nlistCount--;\nshortenList();"
-   },
-   {
-    "t": "p",
-    "x": "**`shortenList`** is the trap. It's `expand()` run backwards: allocate an array one smaller, copy the live entries, delete the old one, repoint, `listCapacity--`. But only when `shortenEnabled` is true, and only if there's room to lose a slot (a delete just freed one, so there is). When the new capacity would be 0, the new array is NULL; copy the pattern from the constructor."
-   },
-   {
-    "t": "p",
-    "x": "The spec changes `deleteFirst` and `deleteLast` for Part B: each calls `shortenList()` after a successful delete. The starter already has that line in both; your job is to make `shortenList` real. With shortening on, a capacity-4 list with three entries goes to 3 after one delete, 2 after the next. With it off, nothing changes. The second test walks exactly that."
-   },
-   {
-    "t": "p",
-    "x": "Why would anyone want this? Memory. A list that grew to a thousand and then emptied is still holding a thousand slots; shortening gives them back one at a time. It costs an allocation per delete, which is why it's a switch and not the default."
-   },
-   {
-    "t": "p",
-    "x": "**`printItBackwards`** prints the same entries `printIt(limit)` would, highest index first. Compute `n` the same way, then count down. The `i > 0` / `i - 1` shape from `insert` keeps the unsigned loop safe."
-   }
-  ]
- },
- {
-  "lesson_id": "p1_12",
-  "blocks": [
-   {
-    "t": "p",
-    "x": "This is the lesson with the bug that crashes programs silently. A `list` holds a pointer to its array. If you copy a list by copying its members, both lists now point at the **same** array:"
-   },
-   {
-    "t": "code",
-    "x": "keyValues = srcList->keyValues;     // WRONG: two lists, one array"
-   },
-   {
-    "t": "p",
-    "x": "Add to the copy and the original changes. Destroy the copy and its destructor frees the array; the original's destructor then frees it *again*, which is undefined behaviour: a crash if you're lucky, silent corruption if you're not. The fix is a **deep copy**: the new list allocates its own array and copies the entries into it."
-   },
-   {
-    "t": "code",
-    "x": "listCapacity = srcList->listCapacity;    // ... and the other five control members\nlistCount = srcList->listCount;\n\nkeyValues = new KEY_VALUE[listCapacity];    // OUR array\nfor (unsigned int i = 0; i < listCount; i++) {\n    keyValues[i] = srcList->keyValues[i];   // copy the ENTRIES, not the pointer\n}"
-   },
-   {
-    "t": "p",
-    "x": "The driver's `copy` command is designed to catch the shallow version: it makes a copy, adds 999 to it, prints both counts, deletes the copy, then prints the original. If the original still prints cleanly, the copy was deep."
-   },
-   {
-    "t": "p",
-    "x": "**`cat(list2)`** makes a third list from two. The spec fixes its capacity: the two counts added together, so there's exactly enough room and no more. Build it with the ordinary constructor and fill it with `add`:"
-   },
-   {
-    "t": "code",
-    "x": "unsigned int total = listCount + (list2 != NULL ? list2->listCount : 0);\nlist *result = new list(total, expandSize);\n\nfor (unsigned int i = 0; i < listCount; i++) {\n    result->add(keyValues[i]);\n}\nif (list2 != NULL) {\n    for (unsigned int i = 0; i < list2->listCount; i++) {\n        result->add(list2->keyValues[i]);\n    }\n}\nreturn result;"
-   },
-   {
-    "t": "p",
-    "x": "Note `list2->listCount` and `list2->keyValues`: those are private, but a member function of `list` may touch the private members of *any* `list`, not just `this`. Private is per class, not per object. That's what makes the copy constructor possible too."
-   },
-   {
-    "t": "p",
-    "x": "The caller owns whatever `cat` returns and has to `delete` it; the driver does. A `cat` with `NULL` is a plain copy of this list, and a `cat` on an empty list with `NULL` gives a capacity-0 list whose array is NULL, which the third test checks."
+    "x": "Try it in the Tree Lab: insert `1 2 3 4 5 6 7` as pairs and watch the stick grow. Mission: root height 4 or more. Then remember that shape \u2014 next lesson the same input produces height 3, and you'll watch the nodes swing into place."
    }
   ]
  },
@@ -677,6 +374,570 @@
    {
     "t": "p",
     "x": "Now try the challenge. Declare your counter in the loop header and print one number per line."
+   }
+  ]
+ },
+ {
+  "lesson_id": "p1_2",
+  "blocks": [
+   {
+    "t": "p",
+    "x": "Now the list can hold something. **`add(kv)`** appends: the first free slot is `keyValues[listCount]` (slots 0 to count\u22121 are in use), so store there and bump the count. Post-increment does both in one expression:"
+   },
+   {
+    "t": "code",
+    "x": "keyValues[listCount++] = kv;    // use the OLD count as the index, then add one"
+   },
+   {
+    "t": "p",
+    "x": "The spec says: if the list is full, call `expand()` first, and if that fails, `add` returns false. `expand()` is next lesson; this lesson's starter has it as a stub returning false, so a full list simply refuses. The pattern is the return-code shape again: decide `rc`, act if `rc`, return `rc`."
+   },
+   {
+    "t": "p",
+    "x": "**`printIt(limit)`** prints one line per entry, `index key`. The wrinkle is `limit`: negative or bigger than the count means the whole list. So compute how many to print first, then loop:"
+   },
+   {
+    "t": "code",
+    "x": "unsigned int n = listCount;\nif (limit >= 0 && (unsigned int) limit < listCount) {\n    n = limit;\n}\nfor (unsigned int i = 0; i < n; i++) {\n    cout << i << \" \" << keyValues[i].key << endl;\n}"
+   },
+   {
+    "t": "p",
+    "x": "The cast `(unsigned int) limit` matters: `limit` is a signed `int` (it has to be, to allow \u22121) and `listCount` is unsigned. Comparing them directly earns a warning under his flags, and the assignment requires a warning-free build. Check the sign first, then cast."
+   },
+   {
+    "t": "p",
+    "x": "Why `const` on `printIt`? It reads the list and prints; it changes nothing. If you forget it here, you can't call `printIt` on a `const list` later, and the compiler will refuse to match the prototype."
+   },
+   {
+    "t": "p",
+    "x": "The second test builds a list of capacity 3 with expand size 0, adds four, and expects the fourth to print `add 4 FAILED`. That's the full-list path, and it's how he'll test you too."
+   },
+   {
+    "t": "p",
+    "x": "**New in the hidden parts.** Added to `list.h` this lesson (the editor only shows the `.cpp` side; the prototypes are already declared for you):"
+   },
+   {
+    "t": "ul",
+    "items": [
+     "`bool expand();` \u2014 declared now, written next lesson; for this lesson it's a stub that returns false.",
+     "`bool add(KEY_VALUE kv);` and `void printIt(int limit) const;` \u2014 note `printIt` takes a signed `int`, so \u22121 can mean \"all\"."
+    ]
+   },
+   {
+    "t": "p",
+    "x": "New driver commands the tests can use:"
+   },
+   {
+    "t": "ul",
+    "items": [
+     "`add 5 50` builds a `KEY_VALUE` with key 5 and value 50, calls `add`, and prints `ok` or `FAILED` depending on the bool that came back.",
+     "`print -1` calls `printIt(-1)`, the whole list; `print 2` calls `printIt(2)`, the first two."
+    ]
+   }
+  ]
+ },
+ {
+  "lesson_id": "p1_3",
+  "blocks": [
+   {
+    "t": "p",
+    "x": "Arrays in C++ can't grow. `new KEY_VALUE[10]` is ten slots forever. So \"growing\" means **making a bigger array and moving house**, and `expand()` is that move, done in a strict order:"
+   },
+   {
+    "t": "code",
+    "x": "KEY_VALUE *bigger = new KEY_VALUE[listCapacity + expandSize];   // 1. new, bigger home\n\nfor (unsigned int i = 0; i < listCount; i++) {\n    bigger[i] = keyValues[i];                                   // 2. carry the furniture over\n}\n\nif (keyValues != NULL) {\n    delete [] keyValues;                                        // 3. give up the old home\n}\n\nkeyValues = bigger;                                             // 4. remember the new address\nlistCapacity += expandSize;"
+   },
+   {
+    "t": "p",
+    "x": "Get the order wrong and things break in two different ways. Delete before you copy and step 2 reads from memory you no longer own: it may *seem* to work, which is worse. Skip the delete and every expand leaks one array; the program runs, and slowly eats memory. That second one is the bug the destructor lesson warned about, happening in the middle of the program's life."
+   },
+   {
+    "t": "p",
+    "x": "Two details from the spec. `expand()` returns false when `expandSize` is 0, because growing by nothing isn't growing. And a list built with capacity 0 has `keyValues == NULL`, so the delete must be guarded, but the rest works: a NULL array with zero entries copies nothing and becomes a real array of `expandSize` slots."
+   },
+   {
+    "t": "p",
+    "x": "Once `expand()` works, `add` from last lesson starts succeeding on a full list without any change to `add` itself. That's the point of writing the pieces in this order: each one is small, and the earlier ones get better for free."
+   },
+   {
+    "t": "p",
+    "x": "Draw this one. Two boxes for the old and new arrays, the pointer moving from one to the other. The exam's \"design a storage structure\" question for a growable list is exactly this picture."
+   },
+   {
+    "t": "p",
+    "x": "**New in the hidden parts.** Added to `list.h` this lesson (the editor only shows the `.cpp` side; the prototypes are already declared for you):"
+   },
+   {
+    "t": "ul",
+    "items": [
+     "`bool expand();` \u2014 now for real."
+    ]
+   },
+   {
+    "t": "p",
+    "x": "New driver commands the tests can use:"
+   },
+   {
+    "t": "ul",
+    "items": [
+     "`expand` calls `expand()` directly and prints whether it worked."
+    ]
+   }
+  ]
+ },
+ {
+  "lesson_id": "p1_4",
+  "blocks": [
+   {
+    "t": "p",
+    "x": "`add` put things at the back, where there was already space. **`insert`** puts things at the *front*, where there isn't. Making room means moving every entry one slot to the right, and the direction you do that in is the whole lesson."
+   },
+   {
+    "t": "p",
+    "x": "Suppose the list holds `[A, B, C]` and you want `X` at the front. Copy from the back:"
+   },
+   {
+    "t": "code",
+    "x": "[A, B, C, _]   copy C into slot 3   ->  [A, B, C, C]\n               copy B into slot 2   ->  [A, B, B, C]\n               copy A into slot 1   ->  [A, A, B, C]\n               put X in slot 0      ->  [X, A, B, C]"
+   },
+   {
+    "t": "p",
+    "x": "Now try it from the front: copy A into slot 1 and you've destroyed B. Copy slot 1 (now A) into slot 2 and you've destroyed C. You end with `[X, A, A, A]`. The loop that works runs *down*:"
+   },
+   {
+    "t": "code",
+    "x": "for (unsigned int i = listCount; i > 0; i--) {\n    keyValues[i] = keyValues[i - 1];\n}\nkeyValues[0] = kv;\nlistCount++;"
+   },
+   {
+    "t": "p",
+    "x": "Watch the loop condition. `i` is unsigned, so `i >= 0` is always true and the loop never ends (it wraps around to 4 billion and crashes). `i > 0` with `i - 1` inside is the safe shape, and you'll use it again in `deleteFirst` and `insertAt`."
+   },
+   {
+    "t": "p",
+    "x": "This shifting is why `insert` costs O(n) while `add` costs O(1): every entry moves. Write that in a comment above the function. In P2, the linked list exists specifically to make insert-at-front O(1) again, and you'll appreciate it more for having written this."
+   },
+   {
+    "t": "p",
+    "x": "**New in the hidden parts.** Added to `list.h` this lesson (the editor only shows the `.cpp` side; the prototypes are already declared for you):"
+   },
+   {
+    "t": "ul",
+    "items": [
+     "`bool insert(KEY_VALUE kv);`"
+    ]
+   },
+   {
+    "t": "p",
+    "x": "New driver commands the tests can use:"
+   },
+   {
+    "t": "ul",
+    "items": [
+     "`insert 5 50` is `add` but through `insert`, so the entry goes to the front."
+    ]
+   }
+  ]
+ },
+ {
+  "lesson_id": "p1_5",
+  "blocks": [
+   {
+    "t": "p",
+    "x": "Two new ideas here, one in the signature and one in the body."
+   },
+   {
+    "t": "p",
+    "x": "**The signature.** `bool deleteFirst(KEY_VALUE &kv)` returns a `bool` *and* the deleted entry. The `&` makes `kv` a **reference**: inside the function, `kv` *is* the caller's variable, not a copy. Assign to it and the caller sees the change:"
+   },
+   {
+    "t": "code",
+    "x": "// in the driver\nKEY_VALUE got;\nif (L->deleteFirst(got)) {          // got is filled in by the function\n    cout << got.key << endl;\n}\n\n// in the function\nkv = keyValues[0];                  // writes straight into the caller's `got`"
+   },
+   {
+    "t": "p",
+    "x": "Without the `&`, `kv` would be a copy, the assignment would change the copy, and the caller would see nothing. This is the same trick `cin >> x` uses, and you'll use it in `readAt`, `deleteAt`, and all through P2. The spec adds a rule: if the list is empty, return false and leave `kv` exactly as it was."
+   },
+   {
+    "t": "p",
+    "x": "**The body.** `deleteFirst` is `insert` in reverse: entry 0 goes out through `kv`, and everything moves one slot *left*. Now you start from the **front**:"
+   },
+   {
+    "t": "code",
+    "x": "kv = keyValues[0];\nfor (unsigned int i = 1; i < listCount; i++) {\n    keyValues[i - 1] = keyValues[i];    // 1 -> 0, 2 -> 1, 3 -> 2 ...\n}\nlistCount--;"
+   },
+   {
+    "t": "p",
+    "x": "Starting from the back here would overwrite slot `count-2` with slot `count-1` before you'd saved it. Insert shifts right from the back; delete shifts left from the front. Draw both once and you won't mix them up."
+   },
+   {
+    "t": "p",
+    "x": "**`deleteLast`** has no shifting at all. The last used slot is `listCount - 1`; copy it out and drop the count. `kv = keyValues[--listCount];` does both, with the pre-decrement so the index is right. The spec says *do not shorten the list*: the capacity stays, the slot just stops counting, like the Bag's `clear`."
+   },
+   {
+    "t": "p",
+    "x": "Note the cost difference: `deleteFirst` is O(n), `deleteLast` is O(1). Same list, two ends, very different prices. A queue built on this array would be expensive on one end, and P2's linked list fixes exactly that."
+   },
+   {
+    "t": "p",
+    "x": "**New in the hidden parts.** Added to `list.h` this lesson (the editor only shows the `.cpp` side; the prototypes are already declared for you):"
+   },
+   {
+    "t": "ul",
+    "items": [
+     "`bool deleteFirst(KEY_VALUE &kv);` and `bool deleteLast(KEY_VALUE &kv);` \u2014 the `&` makes `kv` a reference, so the function can fill in the caller's variable."
+    ]
+   },
+   {
+    "t": "p",
+    "x": "New driver commands the tests can use:"
+   },
+   {
+    "t": "ul",
+    "items": [
+     "`delfirst` makes an empty `KEY_VALUE`, hands it to `deleteFirst` by reference, and prints what came back, or `empty` if the bool was false.",
+     "`dellast` does the same through `deleteLast`."
+    ]
+   }
+  ]
+ },
+ {
+  "lesson_id": "p1_6",
+  "blocks": [
+   {
+    "t": "p",
+    "x": "These two are the **read-only** half of the interface: they look at the list and change nothing, so both carry `const`. They're short, but each shows a pattern he'll ask about."
+   },
+   {
+    "t": "p",
+    "x": "**`readAt(index, kv)`** answers \"what's at position i?\" without exposing the array. The caller passes a `KEY_VALUE` by reference, the function fills it in if the index is valid. And \"valid\" is one comparison:"
+   },
+   {
+    "t": "code",
+    "x": "bool rc = (index < listCount);   // unsigned: negative values are already impossible\nif (rc) {\n    kv = keyValues[index];\n}\nreturn rc;"
+   },
+   {
+    "t": "p",
+    "x": "Why no `index >= 0` check? Because `index` is `unsigned int`; there is no negative to check for. That's one of the reasons he insists on `unsigned` for indexes and counts: the type does half the validation."
+   },
+   {
+    "t": "p",
+    "x": "**`getIndex(key)`** searches. It's `isPresent` from the Bag, except it returns *where* instead of *whether*. The problem is the return type: an `unsigned int` can't be \u22121 to mean \"not found\". So `common.h` defines `NEG_RESULT` as `0xFFFFFFFF`, the largest unsigned value, which no real list could ever reach:"
+   },
+   {
+    "t": "code",
+    "x": "unsigned int rc = NEG_RESULT;           // assume not found\nfor (unsigned int i = 0; i < listCount; i++) {\n    if (keyValues[i].key == key) {\n        rc = i;\n        break;                          // first match wins\n    }\n}\nreturn rc;"
+   },
+   {
+    "t": "p",
+    "x": "The caller compares against `NEG_RESULT`, never against \u22121. (Fun fact: `(unsigned int) -1` *is* `0xFFFFFFFF`, which is why the name has NEG in it. Don't rely on that in your code; use the constant.)"
+   },
+   {
+    "t": "p",
+    "x": "The third test has two entries with key 7. `getIndex` must return the *first* one, index 0, which is what the `break` guarantees."
+   },
+   {
+    "t": "p",
+    "x": "**New in the hidden parts.** Added to `list.h` this lesson (the editor only shows the `.cpp` side; the prototypes are already declared for you):"
+   },
+   {
+    "t": "ul",
+    "items": [
+     "`bool readAt(unsigned int index, KEY_VALUE &kv) const;` and `unsigned int getIndex(int key) const;` \u2014 both `const`, because reading changes nothing."
+    ]
+   },
+   {
+    "t": "p",
+    "x": "New driver commands the tests can use:"
+   },
+   {
+    "t": "ul",
+    "items": [
+     "`readat 2` sets `kv` to \u22121/\u22121 first, then calls `readAt(2, kv)`. If the index was invalid it prints that `kv` still holds \u22121, which proves you didn't touch it.",
+     "`index 9` calls `getIndex(9)` and prints the index, or the word `NEG_RESULT` if that's what came back."
+    ]
+   }
+  ]
+ },
+ {
+  "lesson_id": "p1_7",
+  "blocks": [
+   {
+    "t": "p",
+    "x": "**`clear()`** is where the two `original` members earn their keep. After a few expands the list might have capacity 50; `clear()` has to put it back to the capacity it was *built* with, as if it were new. So it's not just `listCount = 0` like the Bag; it's a rebuild:"
+   },
+   {
+    "t": "code",
+    "x": "listCount = 0;\nlistCapacity = originalListCapacity;\nexpandSize = originalExpandSize;\n\nif (keyValues != NULL) {\n    delete [] keyValues;              // the destructor's job ...\n}\n\nif (listCapacity > 0) {\n    keyValues = new KEY_VALUE[listCapacity];   // ... then the constructor's\n} else {\n    keyValues = NULL;\n}"
+   },
+   {
+    "t": "p",
+    "x": "Read that as *destructor, then constructor*. It's the same two pieces of code you already wrote, in sequence. The spec also says `shortenEnabled` keeps its value, so don't reset it."
+   },
+   {
+    "t": "p",
+    "x": "With `clear()` done, **Part A is complete**: constructor, destructor, `expand`, `insert`, `add`, `deleteFirst`, `deleteLast`, `setExpandSize`, `getExpandSize`, `clear`, `readAt`, `getIndex`, `printIt`, `getCount`, `getCapacity`. Scroll through the whole file once and notice how much of it is the same three shapes: the return-code pattern, the shift loop in one direction or the other, and allocate-copy-delete-repoint."
+   },
+   {
+    "t": "p",
+    "x": "Before moving on, do what he'll make you do: write the **cost** of each function as a comment above it. `add` and `deleteLast` are O(1); `insert`, `deleteFirst` and `getIndex` are O(n); `expand` is O(n) but happens only once per `expandSize` adds. That table is an exam question."
+   },
+   {
+    "t": "p",
+    "x": "**New in the hidden parts.** Added to `list.h` this lesson (the editor only shows the `.cpp` side; the prototypes are already declared for you):"
+   },
+   {
+    "t": "ul",
+    "items": [
+     "`void clear();`"
+    ]
+   },
+   {
+    "t": "p",
+    "x": "New driver commands the tests can use:"
+   },
+   {
+    "t": "ul",
+    "items": [
+     "`clear` calls `clear()` and prints count, capacity and expand size afterwards, which is how the test sees that you restored the originals."
+    ]
+   }
+  ]
+ },
+ {
+  "lesson_id": "p1_8",
+  "blocks": [
+   {
+    "t": "p",
+    "x": "Everything you've written in this chapter, from a blank implementation, with the driver throwing every command at it. No new concepts; this is the **cold re-implementation** your study plan schedules for the week after you first build something."
+   },
+   {
+    "t": "p",
+    "x": "Why do it this way? Because the integrity policy means the real P1 is written alone, and the exam asks you to write these algorithms by hand. Being able to *follow* the earlier lessons is not the same as being able to *produce* them. This lesson measures the second thing."
+   },
+   {
+    "t": "p",
+    "x": "Time yourself. Under an hour for all of Part A means you know it. Over two means do lessons 1\u20137 once more next week and come back."
+   },
+   {
+    "t": "p",
+    "x": "When it passes, open the Workbench, press **Blank files**, and write the same class split into `list.h` and `list.cpp` with your own Makefile. That's the form he'll grade."
+   }
+  ]
+ },
+ {
+  "lesson_id": "p1_9",
+  "blocks": [
+   {
+    "t": "p",
+    "x": "Part B starts here. Everything highlighted on the assignment sheet, in roughly the order you'd write it."
+   },
+   {
+    "t": "p",
+    "x": "**`insertAt`** is `insert` with a dial on it. `insert` always opens slot 0; `insertAt` opens slot `index`. Same loop, same direction (right, from the back), different stopping point:"
+   },
+   {
+    "t": "code",
+    "x": "for (unsigned int i = listCount; i > index; i--) {\n    keyValues[i] = keyValues[i - 1];\n}\nkeyValues[index] = kv;\nlistCount++;"
+   },
+   {
+    "t": "p",
+    "x": "With `index = 0` this is exactly `insert`. With `index = listCount` the loop runs zero times and this is exactly `add`. One function, both behaviours; he could have written the other two in terms of this one."
+   },
+   {
+    "t": "p",
+    "x": "The validity rule is a little different from `readAt`: `index <= listCount`, with the equals. An index one past the end is fine (it means append); two past would leave an uninitialised gap, so the spec says refuse and *change nothing*, which includes not expanding. Check the index before you expand."
+   },
+   {
+    "t": "p",
+    "x": "The third test starts with an empty list and does `insertat 0`, which must work (0 \u2264 0). Then `insertat 1` on a one-entry list, which appends. Keep the \u2264."
+   },
+   {
+    "t": "p",
+    "x": "**New in the hidden parts.** Added to `list.h` this lesson (the editor only shows the `.cpp` side; the prototypes are already declared for you):"
+   },
+   {
+    "t": "ul",
+    "items": [
+     "`bool insertAt(unsigned int index, KEY_VALUE kv);`"
+    ]
+   },
+   {
+    "t": "p",
+    "x": "New driver commands the tests can use:"
+   },
+   {
+    "t": "ul",
+    "items": [
+     "`insertat 1 20 2` calls `insertAt(1, {20, 2})` and prints `ok` or `FAILED`."
+    ]
+   }
+  ]
+ },
+ {
+  "lesson_id": "p1_10",
+  "blocks": [
+   {
+    "t": "p",
+    "x": "**`insertByKey`** keeps the list in key order, one insertion at a time. Find where the new key belongs, then let `insertAt` do the shifting. Two steps, and the second one is already written:"
+   },
+   {
+    "t": "code",
+    "x": "unsigned int index = listCount;             // if nothing is bigger, go at the end\nfor (unsigned int i = 0; i < listCount; i++) {\n    if (keyValues[i].key > kv.key) {\n        index = i;                          // first entry bigger than ours\n        break;\n    }\n}\nreturn insertAt(index, kv);"
+   },
+   {
+    "t": "p",
+    "x": "That's it. Returning `insertAt`'s result directly is what the spec asks for and saves you a variable."
+   },
+   {
+    "t": "p",
+    "x": "Notice the strict `>`. A key equal to one already present isn't \"greater\", so the search keeps going and the duplicate lands *after* the existing copies. That's the stable choice, and the test with two 20s checks it."
+   },
+   {
+    "t": "p",
+    "x": "You've met this before: it's the inner loop of insertion sort, finding the slot for the next card and shifting the bigger ones right. A list that only ever receives entries through `insertByKey` is always sorted, which is why `getIndex` could be made faster with binary search. Not required here, but a good question to be able to answer."
+   },
+   {
+    "t": "p",
+    "x": "The last test mixes `add` (unsorted) with `insertByKey`. The function doesn't sort the list; it only places the new entry before the first bigger key it meets. With `[50, 10]` and a new 20, it stops at 50 and the result is `[20, 50, 10]`. That's correct per spec and a nice reminder that `insertByKey` assumes the list was sorted to begin with."
+   },
+   {
+    "t": "p",
+    "x": "**New in the hidden parts.** Added to `list.h` this lesson (the editor only shows the `.cpp` side; the prototypes are already declared for you):"
+   },
+   {
+    "t": "ul",
+    "items": [
+     "`bool insertByKey(KEY_VALUE kv);`"
+    ]
+   },
+   {
+    "t": "p",
+    "x": "New driver commands the tests can use:"
+   },
+   {
+    "t": "ul",
+    "items": [
+     "`insertbykey 20 2` calls `insertByKey({20, 2})`."
+    ]
+   }
+  ]
+ },
+ {
+  "lesson_id": "p1_11",
+  "blocks": [
+   {
+    "t": "p",
+    "x": "Three small functions and one with a trap."
+   },
+   {
+    "t": "p",
+    "x": "**`deleteAt`** is to `deleteFirst` what `insertAt` was to `insert`: the same left shift, starting one past the deleted slot instead of at 1."
+   },
+   {
+    "t": "code",
+    "x": "kv = keyValues[index];\nfor (unsigned int i = index + 1; i < listCount; i++) {\n    keyValues[i - 1] = keyValues[i];\n}\nlistCount--;\nshortenList();"
+   },
+   {
+    "t": "p",
+    "x": "**`shortenList`** is the trap. It's `expand()` run backwards: allocate an array one smaller, copy the live entries, delete the old one, repoint, `listCapacity--`. But only when `shortenEnabled` is true, and only if there's room to lose a slot (a delete just freed one, so there is). When the new capacity would be 0, the new array is NULL; copy the pattern from the constructor."
+   },
+   {
+    "t": "p",
+    "x": "The spec changes `deleteFirst` and `deleteLast` for Part B: each calls `shortenList()` after a successful delete. The starter already has that line in both; your job is to make `shortenList` real. With shortening on, a capacity-4 list with three entries goes to 3 after one delete, 2 after the next. With it off, nothing changes. The second test walks exactly that."
+   },
+   {
+    "t": "p",
+    "x": "Why would anyone want this? Memory. A list that grew to a thousand and then emptied is still holding a thousand slots; shortening gives them back one at a time. It costs an allocation per delete, which is why it's a switch and not the default."
+   },
+   {
+    "t": "p",
+    "x": "**`printItBackwards`** prints the same entries `printIt(limit)` would, highest index first. Compute `n` the same way, then count down. The `i > 0` / `i - 1` shape from `insert` keeps the unsigned loop safe."
+   },
+   {
+    "t": "p",
+    "x": "**New in the hidden parts.** Added to `list.h` this lesson (the editor only shows the `.cpp` side; the prototypes are already declared for you):"
+   },
+   {
+    "t": "ul",
+    "items": [
+     "`bool deleteAt(unsigned int index, KEY_VALUE &kv);`",
+     "`void shortenList();`, `void setShortenEnabled(bool shorten);`, `bool getShortenEnabled() const;` and `void printItBackwards(int limit) const;`"
+    ]
+   },
+   {
+    "t": "p",
+    "x": "New driver commands the tests can use:"
+   },
+   {
+    "t": "ul",
+    "items": [
+     "`delat 1` calls `deleteAt(1, kv)` and prints what came out, or `invalid`.",
+     "`shorten on` / `shorten off` calls `setShortenEnabled` and prints `getShortenEnabled()` back.",
+     "`printback -1` calls `printItBackwards(-1)`."
+    ]
+   }
+  ]
+ },
+ {
+  "lesson_id": "p1_12",
+  "blocks": [
+   {
+    "t": "p",
+    "x": "This is the lesson with the bug that crashes programs silently. A `list` holds a pointer to its array. If you copy a list by copying its members, both lists now point at the **same** array:"
+   },
+   {
+    "t": "code",
+    "x": "keyValues = srcList->keyValues;     // WRONG: two lists, one array"
+   },
+   {
+    "t": "p",
+    "x": "Add to the copy and the original changes. Destroy the copy and its destructor frees the array; the original's destructor then frees it *again*, which is undefined behaviour: a crash if you're lucky, silent corruption if you're not. The fix is a **deep copy**: the new list allocates its own array and copies the entries into it."
+   },
+   {
+    "t": "code",
+    "x": "listCapacity = srcList->listCapacity;    // ... and the other five control members\nlistCount = srcList->listCount;\n\nkeyValues = new KEY_VALUE[listCapacity];    // OUR array\nfor (unsigned int i = 0; i < listCount; i++) {\n    keyValues[i] = srcList->keyValues[i];   // copy the ENTRIES, not the pointer\n}"
+   },
+   {
+    "t": "p",
+    "x": "The driver's `copy` command is designed to catch the shallow version: it makes a copy, adds 999 to it, prints both counts, deletes the copy, then prints the original. If the original still prints cleanly, the copy was deep."
+   },
+   {
+    "t": "p",
+    "x": "**`cat(list2)`** makes a third list from two. The spec fixes its capacity: the two counts added together, so there's exactly enough room and no more. Build it with the ordinary constructor and fill it with `add`:"
+   },
+   {
+    "t": "code",
+    "x": "unsigned int total = listCount + (list2 != NULL ? list2->listCount : 0);\nlist *result = new list(total, expandSize);\n\nfor (unsigned int i = 0; i < listCount; i++) {\n    result->add(keyValues[i]);\n}\nif (list2 != NULL) {\n    for (unsigned int i = 0; i < list2->listCount; i++) {\n        result->add(list2->keyValues[i]);\n    }\n}\nreturn result;"
+   },
+   {
+    "t": "p",
+    "x": "Note `list2->listCount` and `list2->keyValues`: those are private, but a member function of `list` may touch the private members of *any* `list`, not just `this`. Private is per class, not per object. That's what makes the copy constructor possible too."
+   },
+   {
+    "t": "p",
+    "x": "The caller owns whatever `cat` returns and has to `delete` it; the driver does. A `cat` with `NULL` is a plain copy of this list, and a `cat` on an empty list with `NULL` gives a capacity-0 list whose array is NULL, which the third test checks."
+   },
+   {
+    "t": "p",
+    "x": "**New in the hidden parts.** Added to `list.h` this lesson (the editor only shows the `.cpp` side; the prototypes are already declared for you):"
+   },
+   {
+    "t": "ul",
+    "items": [
+     "`list(list *srcList);` \u2014 a second constructor, told apart from the first by its parameter type \u2014 and `list *cat(list *list2);`, which returns a pointer to a brand-new list."
+    ]
+   },
+   {
+    "t": "p",
+    "x": "New driver commands the tests can use:"
+   },
+   {
+    "t": "ul",
+    "items": [
+     "`copy` makes a second list with the copy constructor, adds 999 to the *copy*, prints both counts and the copy, deletes the copy, then prints the original. A shallow copy fails this visibly.",
+     "`cat` builds a little two-entry list (500 and 600), calls `cat` on yours with it, prints the result's count, capacity and entries, then deletes the result.",
+     "`catnull` calls `cat(NULL)`: the result should be a copy of just your list."
+    ]
    }
   ]
  },

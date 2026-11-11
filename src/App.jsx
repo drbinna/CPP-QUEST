@@ -242,7 +242,7 @@ export default function CppQuest() {
           const res = await fetch(`${SUPABASE_URL}/functions/v1/chat`, {
             method: "POST",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${ANON_KEY}`, apikey: ANON_KEY },
-            body: JSON.stringify({ title: lesson.title, challenge: lesson.challenge, tests: lesson.tests, code, result_summary: runSummary(), messages: history.slice(-12) }),
+            body: JSON.stringify({ title: lesson.title, challenge: lesson.challenge, tests: lesson.tests, code: fullCode, result_summary: runSummary(), messages: history.slice(-12) }),
           });
           data = await res.json();
         } catch { data = null; }
@@ -267,6 +267,21 @@ export default function CppQuest() {
     if ((e.ctrlKey || e.metaKey) && e.key === "Enter") run();
   };
 
+  // Some lessons keep scaffolding (headers, class declaration, driver) out of the editor.
+  // It is wrapped around the student's code at compile time, and error lines are mapped back.
+  const preludeLines = lesson.prelude ? lesson.prelude.split("\n").length : 0;
+  const fullCode = (lesson.prelude ? lesson.prelude + "\n" : "") + code + (lesson.postlude ? "\n" + lesson.postlude : "");
+  const remapErr = (txt) => {
+    if (!preludeLines) return txt;
+    const n = code.split("\n").length;
+    return String(txt).replace(/^([^\s:]+):(\d+):/gm, (m, f, l) => {
+      const k = +l - preludeLines;
+      if (k < 1) return `(hidden scaffolding, line ${l}):`;
+      if (k > n) return `(driver, line ${k - n}):`;
+      return `${f}:${k}:`;
+    });
+  };
+
   async function run() {
     if (running) return;
     setRunning(true); setResult(null); setTab("tests");
@@ -278,11 +293,11 @@ export default function CppQuest() {
       const res = await fetch(COMPILE_API, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${ANON_KEY}`, apikey: ANON_KEY },
-        body: JSON.stringify({ code, tests: lesson.tests.map((t) => ({ input: t.input, expected: t.expected })) }),
+        body: JSON.stringify({ code: fullCode, tests: lesson.tests.map((t) => ({ input: t.input, expected: t.expected })) }),
       });
       const data = await res.json();
       if (data.error) netErr = data.error;
-      else if (data.compile_error) compileErr = data.compile_error;
+      else if (data.compile_error) compileErr = remapErr(data.compile_error);
       else outcomes = (data.outcomes || []).map((o) => ({ ...o, pass: norm(o.got) === norm(o.expected) }));
     } catch (err) { netErr = String(err); }
     setRunning(false);
